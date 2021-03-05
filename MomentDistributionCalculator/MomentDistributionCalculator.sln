@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MomentDistributionCalculator", "MomentDistributionCalculator\MomentDistributionCalculator.csproj", "{2A498D77-4510-4BAC-901A-6869DB3A9ACD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A498D77-4510-4BAC-901A-6869DB3A9ACD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A498D77-4510-4BAC-901A-6869DB3A9ACD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A498D77-4510-4BAC-901A-6869DB3A9ACD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A498D77-4510-4BAC-901A-6869DB3A9ACD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {51BA6C3E-5506-42E3-9E2B-748BC3980B9E}
+	EndGlobalSection
+EndGlobal
