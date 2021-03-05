@@ -1,4 +1,5 @@
 ﻿using MomentDistributionCalculator.Model;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
@@ -11,42 +12,104 @@ namespace MomentDistributionCalculator
     /// </summary>
     public partial class MainWindow : Window
     {
+        private const int NUM_NODES = 10; // number of nodes along the top of the structure
+        private const int NUM_BEAMS = NUM_NODES - 1; // number of beams along the top of the structure
+
         private ObservableCollection<MDC_Beam> m_Model = null;
 
-        public ObservableCollection<MDC_Beam> Model { get { return m_Model; } set { m_Model = value; } }
+        public ObservableCollection<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            Model = new ObservableCollection<MDC_Beam>();
+            OnUserCreate();
+            OnUserUpdate();
+
+        }
+
+        private void OnUserCreate()
+        {
+            Members = new ObservableCollection<MDC_Beam>();
 
             // Create some nodes
-            double len = MainCanvas.Width / 10.0f;
-            MDC_Node start = new MDC_Node(20, 30);
+            double len = (MainCanvas.Width) / (NUM_NODES+1);
+            double centerX = (MainCanvas.Width) / 2.0f;
+            double centerY = (MainCanvas.Height) / 2.0f;
+
+            double startX = centerX - NUM_NODES * len / 2.0f;
+            double endX = centerX + NUM_NODES * len / 2.0f;
+            
+            double startY = (MainCanvas.Height / 2.0f) - len / (2.0f);
+            double endY = (MainCanvas.Height / 2.0f) + len / (2.0f);
+
+            MDC_Node start = new MDC_Node((float)startX, (float)startY);
             MDC_Node end = null; ;
             MDC_Node bottom = null; ;
-            for(int i=1; i<10; i++)
+            for (int i = 1; i < NUM_NODES+1; i++)
             {
-                end = new MDC_Node(start.X+(float)len, 30);
-                bottom = new MDC_Node(start.X, 30 + (float)len);
-                
+                end = new MDC_Node((float)startX + (float)(i*len), (float)startY);
+                bottom = new MDC_Node((float)startX + (float)((i-1) * len), (float)startY + (float)len);
+
                 // Create some beams
-                Model.Add(new MDC_Beam(start, end));
-                Model.Add(new MDC_Beam(start, bottom));
+                MDC_Beam beam1 = new MDC_Beam(start, end);
+                MDC_Beam beam2 = new MDC_Beam(start, bottom);
+                Members.Add(beam1);
+                Members.Add(beam2);
                 start = end;
+
+                // Add a distributed load
+                AddDistributedLoad(beam1, 2.0f);
             }
-            bottom = new MDC_Node(start.X, 30 + (float)len);
-            Model.Add(new MDC_Beam(start, bottom));
-            
 
-            // Change color of background
-           // MainCanvas.Background = new SolidColorBrush(Colors.Cyan);
+            // Find the last bottom point and create a member for the rightmost column
+            bottom = new MDC_Node(start.X, start.Y + (float)len);
+            Members.Add(new MDC_Beam(start, bottom));
 
-            foreach(MDC_Beam item in Model)
+
+        }
+
+        public MDC_Beam GetBeam(int id)
+        {
+            bool found = false;
+            MDC_Beam temp = null;
+
+            foreach(MDC_Beam model in Members)
+            {
+                if(model.Index == id)
+                {
+                    temp = model;
+                    found = true;
+                    break;
+                }
+            }
+
+            if(!found)
+            {
+                Console.WriteLine("In GetBeam(): Error retrieving beam # " + id + ". No such member found");
+                return null;
+            } else
+            {
+                return temp;
+            }
+
+           
+        }
+        protected void AddDistributedLoad(MDC_Beam beam, float intensity)
+        {
+            MemberDistributedLoad temp = new MemberDistributedLoad(beam, intensity);
+            beam.AddLoad(temp);
+
+        }
+
+        private void OnUserUpdate()
+        {
+            // Draw the Model
+            foreach (MDC_Beam item in Members)
             {
                 item.Draw(MainCanvas);
             }
+
         }
     }
 }
