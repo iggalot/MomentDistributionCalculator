@@ -15,9 +15,9 @@ namespace MomentDistributionCalculator
         private const int NUM_NODES = 10; // number of nodes along the top of the structure
         private const int NUM_BEAMS = NUM_NODES - 1; // number of beams along the top of the structure
 
-        private ObservableCollection<MDC_Beam> m_Model = null;
+        private List<MDC_Beam> m_Model = null;
 
-        public ObservableCollection<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
+        public List<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
 
         public MainWindow()
         {
@@ -30,12 +30,13 @@ namespace MomentDistributionCalculator
 
         private void OnUserCreate()
         {
-            Members = new ObservableCollection<MDC_Beam>();
+            Members = new List<MDC_Beam>();
 
             // Create some nodes
             double len = (MainCanvas.Width) / (NUM_NODES+1);
             double centerX = (MainCanvas.Width) / 2.0f;
             double centerY = (MainCanvas.Height) / 2.0f;
+            double centerZ = 0.0f;  // for 2D space.
 
             double startX = centerX - NUM_NODES * len / 2.0f;
             double endX = centerX + NUM_NODES * len / 2.0f;
@@ -43,13 +44,16 @@ namespace MomentDistributionCalculator
             double startY = (MainCanvas.Height / 2.0f) - len / (2.0f);
             double endY = (MainCanvas.Height / 2.0f) + len / (2.0f);
 
-            MDC_Node start = new MDC_Node((float)startX, (float)startY);
+            double startZ = centerZ;
+            double endZ = centerZ;
+
+            MDC_Node start = new MDC_Node(startX, startY, startZ);
             MDC_Node end = null; ;
             MDC_Node bottom = null; ;
             for (int i = 1; i < NUM_NODES+1; i++)
             {
-                end = new MDC_Node((float)startX + (float)(i*len), (float)startY);
-                bottom = new MDC_Node((float)startX + (float)((i-1) * len), (float)startY + (float)len);
+                end = new MDC_Node(startX + (i*len), startY, startZ);
+                bottom = new MDC_Node(startX + ((i-1) * len), startY + len, startZ);
 
                 // Create some beams
                 MDC_Beam beam1 = new MDC_Beam(start, end);
@@ -63,7 +67,7 @@ namespace MomentDistributionCalculator
             }
 
             // Find the last bottom point and create a member for the rightmost column
-            bottom = new MDC_Node(start.X, start.Y + (float)len);
+            bottom = new MDC_Node(start.X, start.Y + len, start.Z);
             Members.Add(new MDC_Beam(start, bottom));
 
 
@@ -95,7 +99,7 @@ namespace MomentDistributionCalculator
 
            
         }
-        protected void AddDistributedLoad(MDC_Beam beam, float intensity)
+        protected void AddDistributedLoad(MDC_Beam beam, double intensity)
         {
             MemberDistributedLoad temp = new MemberDistributedLoad(beam, intensity);
             beam.AddLoad(temp);

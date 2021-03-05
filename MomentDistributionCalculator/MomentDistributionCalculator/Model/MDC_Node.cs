@@ -1,23 +1,24 @@
-﻿using System.Windows;
+﻿using MomentDistributionCalculator.Helpers;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace MomentDistributionCalculator.Model
 {
-    public class MDC_Node
+    public class MDC_Node : DrawingObject
     {
         private static int currentIndex = 0;
 
-        private float m_X {get; set;} = 0.0f;
-        private float m_Y { get; set; } = 0.0f;
+        private double m_X {get; set;} = 0.0f;
+        private double m_Y { get; set; } = 0.0f;
+        private double m_Z { get; set; } = 0.0f;
+
         private int m_Index = 0;
 
-        private float m_Width =20;
-        private float m_Height = 20;
+        private double m_radius = 20;  // size of our node
 
-        public float X { get { return m_X; } set { m_X = value; } }
-        public float Y { get { return m_Y; } set { m_Y = value; } }
+        public double X { get { return m_X; } set { m_X = value; } }
+        public double Y { get { return m_Y; } set { m_Y = value; } }
+        public double Z { get { return m_Z; } set { m_Z = value; } }
 
         public int Index
         {
@@ -31,41 +32,23 @@ namespace MomentDistributionCalculator.Model
             }
         }
 
-        public MDC_Node(float x, float y)
+        public MDC_Node(double x, double y, double z)
         {
             X = x;
             Y = y;
+            Z = z;
 
             Index = currentIndex;
             currentIndex++;
         }
 
-        public void Draw(Canvas c)
+        public override void Draw(Canvas c)
         {
-            // Draw a circle node
-            Ellipse myEllipse = new Ellipse();
-            myEllipse.Fill = new SolidColorBrush(Colors.Transparent);
-            myEllipse.Stroke = Brushes.Black;
-            myEllipse.StrokeThickness = 2.0f;
+            // Draw the circle for the node
+            DrawingHelpers.DrawCircleHollow(c, this, m_radius, Colors.Black);
 
-            myEllipse.Width = m_Width;
-            myEllipse.Height = m_Height;
-            Canvas.SetLeft(myEllipse, this.X - m_Width/2.0f);
-            Canvas.SetTop(myEllipse, this.Y - m_Width/2.0f);
-
-            myEllipse.HorizontalAlignment = HorizontalAlignment.Left;
-            myEllipse.VerticalAlignment = VerticalAlignment.Center;
-
-            c.Children.Add(myEllipse);
-
-            // Draw a text for the index lavel
-            TextBlock textBlock = new TextBlock();
-            textBlock.Text = Index.ToString();
-            textBlock.Foreground = new SolidColorBrush(Colors.Black);
-            Canvas.SetLeft(textBlock, this.X + m_Width/2.0f);
-            Canvas.SetTop(textBlock, this.Y);
-            c.Children.Add(textBlock);
-
+            // Draw the node text
+            DrawingHelpers.DrawText(c, this, this.Index.ToString(), m_radius * 0.8, m_radius, Colors.Black);
         }
     }
 }
