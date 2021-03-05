@@ -71,7 +71,6 @@
   <ItemGroup>
     <Compile Include="Model\MDC_Beam.cs" />
     <Compile Include="Model\MDC_Node.cs" />
-    <Compile Include="ObservableCollextion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
