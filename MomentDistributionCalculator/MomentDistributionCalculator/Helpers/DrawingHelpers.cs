@@ -98,14 +98,7 @@ namespace MomentDistributionCalculator.Helpers
             double d4 = 2 * len / 3.0f;
             double angle = 0.0f;   // angle from point upward measured CCW in radians
 
-            // points to draw an upward arrow
-            MDC_Node p1 = point;
-            MDC_Node p2 = DrawingGeometryHelpers.Translate(p1, -d1, d3, 0.0f);
-            MDC_Node p3 = DrawingGeometryHelpers.Translate(p1, -d2, d3, 0.0f);
-            MDC_Node p4 = DrawingGeometryHelpers.Translate(p1, -d2, d4, 0.0f);
-            MDC_Node p5 = DrawingGeometryHelpers.Translate(p1, d2, d4, 0.0f);
-            MDC_Node p6 = DrawingGeometryHelpers.Translate(p1, d2, d3, 0.0f);
-            MDC_Node p7 = DrawingGeometryHelpers.Translate(p1, d1, d3, 0.0f);
+
 
 
             switch (dv)
@@ -116,7 +109,7 @@ namespace MomentDistributionCalculator.Helpers
                 case DirectionVectors.DIR_VERT_POS:
                     angle = 0;
 
-                    //                   point = DrawingGeometryHelpers.Translate(point, 0.0f, d4, 0.0f);
+                    point = DrawingGeometryHelpers.Translate(point, 0.0f, -d4, 0.0f);
                     break;
                 case DirectionVectors.DIR_HORIZ_NEG:
                     break;
@@ -132,6 +125,15 @@ namespace MomentDistributionCalculator.Helpers
                 default:
                     break;
             }
+
+            // points to draw an upward arrow
+            MDC_Node p1 = point;
+            MDC_Node p2 = DrawingGeometryHelpers.Translate(p1, -d1, d3, 0.0f);
+            MDC_Node p3 = DrawingGeometryHelpers.Translate(p1, -d2, d3, 0.0f);
+            MDC_Node p4 = DrawingGeometryHelpers.Translate(p1, -d2, d4, 0.0f);
+            MDC_Node p5 = DrawingGeometryHelpers.Translate(p1, d2, d4, 0.0f);
+            MDC_Node p6 = DrawingGeometryHelpers.Translate(p1, d2, d3, 0.0f);
+            MDC_Node p7 = DrawingGeometryHelpers.Translate(p1, d1, d3, 0.0f);
 
             //// Rotate to orientation
             //p2 = DrawingGeometryHelpers.Rotate2D(p1, p2, angle);

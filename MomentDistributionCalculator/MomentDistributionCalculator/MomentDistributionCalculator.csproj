@@ -78,7 +78,6 @@
   <ItemGroup>
     <Compile Include="Model\BoundingBox.cs" />
     <Compile Include="Helpers\DrawingGeometryHelpers.cs" />
-    <Compile Include="Model\DrawCircle.cs" />
     <Compile Include="Model\DrawingObject.cs" />
     <Compile Include="Model\MDC_Beam.cs" />
     <Compile Include="Model\MDC_Node.cs" />

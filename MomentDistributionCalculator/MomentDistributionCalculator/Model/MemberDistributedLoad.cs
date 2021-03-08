@@ -1,10 +1,7 @@
 ﻿using MomentDistributionCalculator.Helpers;
-using System;
 using System.Collections.Generic;
-using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace MomentDistributionCalculator.Model
 {
@@ -40,20 +37,23 @@ namespace MomentDistributionCalculator.Model
 
         public void Draw(Canvas c)
         {
-
             // Draw a circle node
             DrawingHelpers.DrawCircle(c, this.AttachedTo.GetBeamMidPoint, 20, Colors.Black, Colors.Blue);
 
             foreach (MDC_Node node in LoadPoints)
             {
-                DrawingHelpers.DrawArrows(c, node, Colors.Black, Colors.Green, DirectionVectors.DIR_VERT_NEG);
+                DrawingHelpers.DrawArrows(c, node, Colors.Black, Colors.Green, DirectionVectors.DIR_VERT_POS);
             }
 
-
             // Draw a line -- testing for Rotate2D functionality.
-            MDC_Node newNode = DrawingGeometryHelpers.Rotate2D(this.AttachedTo.Start, this.AttachedTo.End, -Math.PI / 2.0);
-            DrawingHelpers.DrawLine(c, this.AttachedTo.Start, newNode, Colors.Black);
+            DrawingHelpers.DrawLine(
+                c, 
+                this.AttachedTo.Start, 
+                DrawingGeometryHelpers.Translate(this.AttachedTo.Start, 0, -60, 0), 
+                Colors.Black
+            );
 
+            // A test arrow
             DrawingHelpers.DrawArrows(c, new MDC_Node(400, 300, 0), Colors.Black, Colors.Black);
 
             //TODO:  Draw line for top of distributed load

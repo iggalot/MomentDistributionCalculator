@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="850">
     <Grid>
-        <Canvas Name="MainCanvas" Height="450" Width="800" Background="LightGray"/>
+        <Canvas Name="MainCanvas" MouseMove="MainCanvas_MouseMove" Height="450" Width="800" Background="LightGray"/>
+        <TextBox Name="Coords" Height="25" Width="100" VerticalAlignment="Bottom"/>
     </Grid>
 </Window>
