@@ -7,7 +7,19 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="500" Width="850">
     <Grid>
-        <Canvas Name="MainCanvas" MouseMove="MainCanvas_MouseMove" Height="450" Width="800" Background="LightGray"/>
-        <TextBox Name="Coords" Height="25" Width="100" VerticalAlignment="Bottom"/>
+        <Canvas Name="MainCanvas" 
+                MouseMove="MainCanvas_MouseMove" 
+                MouseLeftButtonUp="MainCanvas_MouseLeftButtonUp"
+                MouseRightButtonUp="MainCanvas_MouseRightButtonUp"
+                Height="450" Width="800" Background="LightGray"/>
+        <StackPanel Orientation="Horizontal">
+            <TextBox Name="LeftState" Text="{Binding LeftMouseState}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+
+            <TextBox Name="RightState" Text="{Binding RightMouseState}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+
+            <TextBox Name="Coords" Height="25" Width="100" VerticalAlignment="Bottom"/>
+        </StackPanel>
+
+
     </Grid>
 </Window>

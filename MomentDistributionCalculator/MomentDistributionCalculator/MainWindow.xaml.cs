@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -11,23 +12,55 @@ namespace MomentDistributionCalculator
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private const int NUM_NODES = 10; // number of nodes along the top of the structure
         private const int NUM_BEAMS = NUM_NODES - 1; // number of beams along the top of the structure
 
+        private bool m_LeftMouseState = false;
+        private bool m_RightMouseState = false;
+        private MDC_Node m_FirstSelect = null;
+        private MDC_Node m_SecondSelect = null;
+
         private List<MDC_Beam> m_Model = null;
 
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OnPropertyChanged(string propertyName)
+        {
+            if(PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+
+
         public List<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
+        public bool LeftMouseState 
+        { 
+            get { return m_LeftMouseState; } 
+            set { m_LeftMouseState = value; OnPropertyChanged("LeftMouseState"); } 
+        }
+
+        public bool RightMouseState
+        {
+            get { return m_RightMouseState; }
+            set { m_RightMouseState = value; OnPropertyChanged("RightMouseState"); }
+        }
 
         public MainWindow()
         {
             InitializeComponent();
 
+            DataContext = this;
+
             OnUserCreate();
             OnUserUpdate();
 
         }
+
+        
 
         private void OnUserCreate()
         {
@@ -48,13 +81,20 @@ namespace MomentDistributionCalculator
             double startZ = centerZ;
             double endZ = centerZ;
 
+
+            //// Draws a dummy structure
+            //DummyStructure(len, startX, endX, startY, endY, startZ, endZ);
+        }
+
+        private void DummyStructure(double len, double startX, double endX, double startY, double endY, double startZ, double endZ)
+        {
             MDC_Node start = new MDC_Node(startX, startY, startZ);
             MDC_Node end = null; ;
             MDC_Node bottom = null; ;
-            for (int i = 1; i < NUM_NODES+1; i++)
+            for (int i = 1; i < NUM_NODES + 1; i++)
             {
-                end = new MDC_Node(startX + (i*len), startY, startZ);
-                bottom = new MDC_Node(startX + ((i-1) * len), startY + len, startZ);
+                end = new MDC_Node(startX + (i * len), startY, startZ);
+                bottom = new MDC_Node(startX + ((i - 1) * len), startY + len, startZ);
 
                 // Create some beams
                 MDC_Beam beam1 = new MDC_Beam(start, end);
@@ -70,8 +110,6 @@ namespace MomentDistributionCalculator
             // Find the last bottom point and create a member for the rightmost column
             bottom = new MDC_Node(start.X, start.Y + len, start.Z);
             Members.Add(new MDC_Beam(start, bottom));
-
-
         }
 
         public MDC_Beam GetBeam(int id)
@@ -121,6 +159,48 @@ namespace MomentDistributionCalculator
         {
             Point p = Mouse.GetPosition(MainCanvas);
             Coords.Text = p.X.ToString() + " , " + p.Y.ToString();
+        }
+
+        private void MainCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Point p = Mouse.GetPosition(MainCanvas);
+
+            if (!LeftMouseState)
+            {
+                MainCanvas.Background = Brushes.Gray;
+                m_FirstSelect = new MDC_Node(p.X, p.Y, 0.0f);
+                LeftMouseState = true;
+            } else if (!RightMouseState)
+            {
+                m_SecondSelect = new MDC_Node(p.X, p.Y, 0.0f);
+                RightMouseState = true;
+
+            } 
+            
+            if(LeftMouseState && RightMouseState)
+            {
+                // both buttons have been clicked, so create a beam member between the two
+                Members.Add(new MDC_Beam(m_FirstSelect, m_SecondSelect));
+                LeftMouseState = false;
+                RightMouseState = false;
+                MainCanvas.Background = Brushes.LightGray;
+            }
+
+            
+
+            this.OnUserUpdate();
+        }
+
+        private void MainCanvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            MainCanvas.Background = Brushes.LightGray;
+
+            // clear the first and second click
+            m_FirstSelect = null;
+            LeftMouseState = false;
+            m_SecondSelect = null;
+            RightMouseState = false;
+
         }
     }
 }
