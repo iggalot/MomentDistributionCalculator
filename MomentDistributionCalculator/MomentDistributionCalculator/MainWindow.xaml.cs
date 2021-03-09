@@ -20,13 +20,14 @@ namespace MomentDistributionCalculator
         private const int NUM_NODES = 10; // number of nodes along the top of the structure
         private const int NUM_BEAMS = NUM_NODES - 1; // number of beams along the top of the structure
 
-        private bool m_LeftMouseState = false;
-        private bool m_RightMouseState = false;
-        private MDC_Node m_FirstSelect = null;
-        private MDC_Node m_SecondSelect = null;
+        private bool m_bFirstPointSelected = false;
+        private bool m_bSecondPointSelected = false;
+        private Point m_FirstSelect;
+        private Point m_SecondSelect;
 
         private Point mouseLeftDownPoint;   // captures the cursor position on a left click on the canvas
-        private Shape rubberBand = null;
+        private Shape rubberBand = null;    // for the beam snap rubber band
+        private Shape rubberBandWindow = null; // for the selection box on mouse down
 
         private List<MDC_Beam> m_Model = null;
 
@@ -40,19 +41,43 @@ namespace MomentDistributionCalculator
             }
         }
 
-
+        public List<DrawingObject> MDC_DrawingObjects { get; set; }
 
         public List<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
-        public bool LeftMouseState 
+        public bool bFirstPointSelected 
         { 
-            get { return m_LeftMouseState; } 
-            set { m_LeftMouseState = value; OnPropertyChanged("LeftMouseState"); } 
+            get { return m_bFirstPointSelected; } 
+            set { m_bFirstPointSelected = value; OnPropertyChanged("bFirstPointSelected"); } 
         }
 
-        public bool RightMouseState
+        public bool bSecondPointSelected
         {
-            get { return m_RightMouseState; }
-            set { m_RightMouseState = value; OnPropertyChanged("RightMouseState"); }
+            get { return m_bSecondPointSelected; }
+            set { m_bSecondPointSelected = value; OnPropertyChanged("bSecondPointSelected"); }
+        }
+
+        public double MouseLeftX_First
+        {
+            get { return m_FirstSelect.X; }
+            set { m_FirstSelect.X = value; OnPropertyChanged("MouseLeftX_First"); }
+        }
+
+        public double MouseLeftY_First
+        {
+            get { return m_FirstSelect.Y; }
+            set { m_FirstSelect.Y = value; OnPropertyChanged("MouseLeftY_First"); }
+        }
+
+        public double MouseLeftX_Second
+        {
+            get { return m_SecondSelect.X; }
+            set { m_SecondSelect.X = value; OnPropertyChanged("MouseLeftX_Second"); }
+        }
+
+        public double MouseLeftY_Second
+        {
+            get { return m_SecondSelect.Y; }
+            set { m_SecondSelect.Y = value; OnPropertyChanged("MouseLeftY_Second"); }
         }
 
         public MainWindow()
@@ -65,6 +90,9 @@ namespace MomentDistributionCalculator
             MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
             MainCanvas.MouseMove += MainCanvas_MouseMove;
 
+            bFirstPointSelected = false;
+            bSecondPointSelected = false;
+
             DataContext = this;
 
             OnUserCreate();
@@ -75,6 +103,7 @@ namespace MomentDistributionCalculator
         private void OnUserCreate()
         {
             Members = new List<MDC_Beam>();
+            MDC_DrawingObjects = new List<DrawingObject>();
 
             // Create some nodes
             double len = (MainCanvas.Width) / (NUM_NODES+1);
@@ -111,6 +140,10 @@ namespace MomentDistributionCalculator
                 MDC_Beam beam2 = new MDC_Beam(start, bottom);
                 Members.Add(beam1);
                 Members.Add(beam2);
+
+                MDC_DrawingObjects.Add(beam1);
+                MDC_DrawingObjects.Add(beam2);
+
                 start = end;
 
                 // Add a distributed load
@@ -169,15 +202,22 @@ namespace MomentDistributionCalculator
 
         protected void MainCanvas_MouseMove(object sender, MouseEventArgs args)
         {
+            //if (rubberBand != null)
+            //{
+            //    MainCanvas.Children.Remove(rubberBand);
+            //    rubberBand = null;
+            //}
+
+            
             if (MainCanvas.IsMouseCaptured)
             {
                 Point currentPoint = args.GetPosition(MainCanvas);
 
-                if(rubberBand== null)
+                if (rubberBandWindow == null)
                 {
-                    rubberBand = new Rectangle();
-                    rubberBand.Stroke = new SolidColorBrush(Colors.Green);
-                    MainCanvas.Children.Add(rubberBand);
+                    rubberBandWindow = new Rectangle();
+                    rubberBandWindow.Stroke = new SolidColorBrush(Colors.Green);
+                    MainCanvas.Children.Add(rubberBandWindow);
                 }
 
                 double width = Math.Abs(mouseLeftDownPoint.X - currentPoint.X);
@@ -185,19 +225,29 @@ namespace MomentDistributionCalculator
                 double left = Math.Min(mouseLeftDownPoint.X, currentPoint.X);
                 double top = Math.Min(mouseLeftDownPoint.Y, currentPoint.Y);
 
-                rubberBand.Width = width;
-                rubberBand.Height = height;
-                Canvas.SetLeft(rubberBand, left);
-                Canvas.SetTop(rubberBand, top);
+                rubberBandWindow.Width = width;
+                rubberBandWindow.Height = height;
+                Canvas.SetLeft(rubberBandWindow, left);
+                Canvas.SetTop(rubberBandWindow, top);
+
+                if (rubberBand == null)
+                {
+                    //if (FirstPointSelection == true && RightMouseState == false)
+                    //{
+                        rubberBand = DrawingHelpers.DrawLine(MainCanvas, mouseLeftDownPoint.X, mouseLeftDownPoint.Y, currentPoint.X, currentPoint.Y, Colors.Green);
+     
+
+                    //    MouseLeftX_First = mouseLeftDownPoint.X - currentPoint.X;
+                    //    MouseLeftY_First = mouseLeftDownPoint.Y - currentPoint.Y;
+                    //}
+                }
+
+                Coords.Text = currentPoint.X.ToString() + " , " + currentPoint.Y.ToString();
             }
 
-            //Coords.Text = p.X.ToString() + " , " + p.Y.ToString();
+            args.Handled = true;
 
-            //if(LeftMouseState && !RightMouseState)
-            //{
-            //    MainCanvas.Children.Clear();
-            //    DrawingHelpers.DrawLine(MainCanvas, m_FirstSelect.X, m_FirstSelect.Y, p.X, p.Y, Colors.Green);
-            //}
+
 
             //this.OnUserUpdate();
         }
@@ -208,48 +258,55 @@ namespace MomentDistributionCalculator
             {
                 mouseLeftDownPoint = args.GetPosition(MainCanvas);
                 MainCanvas.CaptureMouse();
+                args.Handled = true;
             }
         }
 
         private void MainCanvas_MouseLeftButtonUp(object sender, MouseEventArgs args)
         {
-            if(MainCanvas.IsMouseCaptured && rubberBand != null)
+            if (MainCanvas.IsMouseCaptured)
             {
-                MainCanvas.Children.Remove(rubberBand);
-                rubberBand = null;
+                if (rubberBandWindow != null)
+                {
+                    MainCanvas.Children.Remove(rubberBandWindow);
+                    rubberBandWindow = null;
+                }
 
-                MainCanvas.ReleaseMouseCapture();
+                Point p = args.GetPosition(MainCanvas);
+
+                if(!bFirstPointSelected)
+                {
+                    MainCanvas.Background = Brushes.Gray;
+                    MouseLeftX_First = p.X;
+                    MouseLeftY_First = p.Y;
+                    DrawingHelpers.DrawCircle(MainCanvas, p.X, p.Y, 15, Colors.Black, Colors.Blue);
+                    bFirstPointSelected = true;
+                    args.Handled = true;
+                }
+                else if (!bSecondPointSelected){
+                    MainCanvas.Background = Brushes.LightGray;
+                    MouseLeftX_Second = p.X;
+                    MouseLeftY_Second = p.Y;
+                    DrawingHelpers.DrawCircle(MainCanvas, p.X, p.Y, 15, Colors.Black, Colors.LightBlue);
+                    bSecondPointSelected = true;
+                    args.Handled = true;
+                }
+
+                if(bFirstPointSelected && bSecondPointSelected)
+                {
+                    // Create the nodes
+                    MDC_Node node1 = new MDC_Node(MouseLeftX_First, MouseLeftY_First, 0.0f);
+                    MDC_Node node2 = new MDC_Node(MouseLeftX_Second, MouseLeftY_Second, 0.0f);
+
+                    // both buttons have been clicked, so create a beam member between the two
+                    Members.Add(new MDC_Beam(node1, node2));
+
+                    bFirstPointSelected = false;
+                    bSecondPointSelected = false;
+                }
+
+                this.OnUserUpdate();
             }
-            //MessageBox.Show("Clicked");
-
-            Point p = Mouse.GetPosition(MainCanvas);
-
-            if (!LeftMouseState)
-            {
-                MainCanvas.Background = Brushes.Gray;
-                m_FirstSelect = new MDC_Node(p.X, p.Y, 0.0f);
-                LeftMouseState = true;
-            }
-            else if (!RightMouseState)
-            {
-                m_SecondSelect = new MDC_Node(p.X, p.Y, 0.0f);
-                RightMouseState = true;
-
-            }
-
-            if (LeftMouseState && RightMouseState)
-            {
-                // both buttons have been clicked, so create a beam member between the two
-                Members.Add(new MDC_Beam(m_FirstSelect, m_SecondSelect));
-                LeftMouseState = false;
-                RightMouseState = false;
-                MainCanvas.Background = Brushes.LightGray;
-            }
-
-
-            this.OnUserUpdate();
-
-
         }
 
         private void MainCanvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -257,10 +314,8 @@ namespace MomentDistributionCalculator
             MainCanvas.Background = Brushes.LightGray;
 
             // clear the first and second click
-            m_FirstSelect = null;
-            LeftMouseState = false;
-            m_SecondSelect = null;
-            RightMouseState = false;
+            bFirstPointSelected = false;
+            bSecondPointSelected = false;
 
 
             this.OnUserUpdate();

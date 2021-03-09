@@ -112,7 +112,7 @@ namespace MomentDistributionCalculator.Helpers
             DrawLine(c, start.X, start.Y, end.X, end.Y, color);
         }
 
-        public static void DrawLine(Canvas c, double x_start, double y_start, double x_end, double y_end, Color color)
+        public static Shape DrawLine(Canvas c, double x_start, double y_start, double x_end, double y_end, Color color)
         {
             Line myLine = new Line();
             myLine.Stroke = new SolidColorBrush(color);
@@ -123,8 +123,12 @@ namespace MomentDistributionCalculator.Helpers
             myLine.Y2 = y_end;
             myLine.HorizontalAlignment = HorizontalAlignment.Left;
             myLine.VerticalAlignment = VerticalAlignment.Center;
+
+            Canvas.SetLeft(myLine, x_start);
+            Canvas.SetTop(myLine, y_start);
             c.Children.Add(myLine);
 
+            return myLine;
         }
 
         /// <summary>
