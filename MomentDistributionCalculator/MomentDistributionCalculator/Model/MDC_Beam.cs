@@ -5,31 +5,17 @@ using System.Windows.Media;
 
 namespace MomentDistributionCalculator.Model
 {
-    public class MDC_Beam
+    public class MDC_Beam : DrawingObject
     {
-        private static int currentIndex = 0;
-
         private MDC_Node m_Start = null;
         private MDC_Node m_End = null;
-        private int m_Index = 0;
+
         private MemberDistributedLoad m_Load = null;
 
         public MDC_Node Start { get { return m_Start; } set { m_Start = value; } }
         public MDC_Node End { get { return m_End; } set { m_End = value; } }
 
         public MemberDistributedLoad Load { get { return m_Load; } set { m_Load = value; } }
-
-        public int Index
-        {
-            get
-            {
-                return m_Index;
-            }
-            set
-            {
-                m_Index = value;
-            }
-        }
 
         /// <summary>
         /// Default constructor for a member
@@ -40,12 +26,9 @@ namespace MomentDistributionCalculator.Model
         {
             Start = start;
             End = end;
-
-            Index = currentIndex;
-            currentIndex++;
         }
 
-        public void Draw(Canvas c)
+        public override void Draw(Canvas c)
         {
             // Draw the start node
             Start.Draw(c);
@@ -54,24 +37,16 @@ namespace MomentDistributionCalculator.Model
             // Draw the Beam Line
             DrawingHelpers.DrawLine(c, Start, End, Colors.Red);
 
-
-            DrawingHelpers.DrawText(c, this.GetBeamMidPoint, m_Index.ToString(), 10, 10, Colors.Blue);
+            // Draw the text for the beam number
+            DrawingHelpers.DrawText(c, 
+                (Start.X + End.X)*0.5, (Start.Y + End.Y)*0.5, 
+                Index.ToString(), 10, 10, Colors.Blue);
 
             // Draw the Load
             if (Load != null)
                 Load.Draw(c);
         }
 
-        /// <summary>
-        /// Returns the mid point of this member based on a linear line
-        /// </summary>
-        public MDC_Node GetBeamMidPoint
-        {
-            get
-            {
-                return DrawingGeometryHelpers.GetMidPoint(Start, End);
-            }
-        }
 
         /// <summary>
         /// Adds a load to the member

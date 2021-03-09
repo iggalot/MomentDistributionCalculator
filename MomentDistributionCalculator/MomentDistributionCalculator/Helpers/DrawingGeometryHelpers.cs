@@ -74,9 +74,9 @@ namespace MomentDistributionCalculator.Model
         /// <param name="n">node to offset</param>
         /// <param name="n2">vector of offset distance</param>
         /// <returns></returns>
-        public static MDC_Node Translate(MDC_Node n, MDC_Node n2)
+        public static MDC_Node Translate(double n_x, double n_y, double n_z, MDC_Node n2)
         {
-            return DrawingGeometryHelpers.Translate(n, (n2.X-n.X), (n2.Y-n.Y), (n2.Z-n.Z));
+            return DrawingGeometryHelpers.Translate(n_x, n_y, n_z, (n2.X-n_x), (n2.Y-n_y), (n2.Z-n_z));
         }
 
         /// <summary>
@@ -87,9 +87,9 @@ namespace MomentDistributionCalculator.Model
         /// <param name="y">y distance</param>
         /// <param name="z">z distance</param>
         /// <returns></returns>
-        public static MDC_Node Translate(MDC_Node n, double x, double y, double z)
+        public static MDC_Node Translate(double n_x, double n_y, double n_z, double x, double y, double z)
         {
-            return new MDC_Node(n.X + x, n.Y + y, n.Z + z);
+            return new MDC_Node(n_x + x, n_y + y, n_z + z);
         }
 
         /// <summary>

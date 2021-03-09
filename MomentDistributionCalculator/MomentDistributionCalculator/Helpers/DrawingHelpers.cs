@@ -20,14 +20,19 @@ namespace MomentDistributionCalculator.Helpers
     /// </summary>
     public static class DrawingHelpers
     {
-        // Draws a transparent filled circle
-
+        // Draws a transparent filled circle at an MDC_Node location
         public static void DrawCircleHollow(Canvas c, MDC_Node n, double r, Color color)
         {
-            DrawCircle(c, n, r, color, Colors.Transparent);
+            DrawCircle(c, n.X, n.Y, r, color, Colors.Transparent);
         }
 
-        public static void DrawCircle(Canvas c, MDC_Node n, double r, Color outline, Color fill)
+        // Draws a transparent filled circle at an MDC_Node location
+        public static void DrawCircleHollow(Canvas c, double x, double y, double r, Color color)
+        {
+            DrawCircle(c, x, y, r, color, Colors.Transparent);
+        }
+
+        public static void DrawCircle(Canvas c, double x, double y, double r, Color outline, Color fill)
         {
             // Draw a circle node
             Ellipse myEllipse = new Ellipse();
@@ -37,39 +42,89 @@ namespace MomentDistributionCalculator.Helpers
 
             myEllipse.Width = r;
             myEllipse.Height = r;
-            Canvas.SetLeft(myEllipse, n.X - myEllipse.Width / 2.0f);
-            Canvas.SetTop(myEllipse, n.Y - myEllipse.Width / 2.0f);
+            Canvas.SetLeft(myEllipse, x - myEllipse.Width / 2.0f);
+            Canvas.SetTop(myEllipse, y - myEllipse.Width / 2.0f);
 
             myEllipse.HorizontalAlignment = HorizontalAlignment.Left;
             myEllipse.VerticalAlignment = VerticalAlignment.Center;
 
             c.Children.Add(myEllipse);
         }
+        /// <summary>
+        /// Draws a circle at an MDC_Node reference
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="n"></param>
+        /// <param name="r"></param>
+        /// <param name="outline"></param>
+        /// <param name="fill"></param>
+        public static void DrawCircle(Canvas c, MDC_Node n, double r, Color outline, Color fill)
+        {
+            DrawCircle(c, n.X, n.Y, r, outline, fill);
+        }
 
+        /// <summary>
+        /// Draw text object at an MDC_Node location
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="n"></param>
+        /// <param name="str"></param>
+        /// <param name="h"></param>
+        /// <param name="r"></param>
+        /// <param name="color"></param>
         public static void DrawText(Canvas c, MDC_Node n, string str, double h, double r, Color color)
+        {
+            DrawText(c, n.X, n.Y, str, h, r, color);
+        }
+
+        /// <summary>
+        /// Draw's text at coordinates x, y on the canbas
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="str"></param>
+        /// <param name="h"></param>
+        /// <param name="r"></param>
+        /// <param name="color"></param>
+        public static void DrawText(Canvas c, double x, double y, string str, double h, double r, Color color)
         {
             // Draw a text for the index lavel
             TextBlock textBlock = new TextBlock();
             textBlock.Text = str;
             textBlock.FontSize = h;
             textBlock.Foreground = new SolidColorBrush(color);
-            Canvas.SetLeft(textBlock, n.X + r/2.0f);
-            Canvas.SetTop(textBlock, n.Y);
+            Canvas.SetLeft(textBlock, x + r/2.0f);
+            Canvas.SetTop(textBlock, y);
             c.Children.Add(textBlock);
         }
 
+
+        /// <summary>
+        /// Draws a line between two MDC_Node points
+        /// </summary>
+        /// <param name="c"></param>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        /// <param name="color"></param>
         public static void DrawLine(Canvas c, MDC_Node start, MDC_Node end, Color color)
+        {
+            DrawLine(c, start.X, start.Y, end.X, end.Y, color);
+        }
+
+        public static void DrawLine(Canvas c, double x_start, double y_start, double x_end, double y_end, Color color)
         {
             Line myLine = new Line();
             myLine.Stroke = new SolidColorBrush(color);
             myLine.StrokeThickness = 2;
-            myLine.X1 = start.X;
-            myLine.Y1 = start.Y;
-            myLine.X2 = end.X;
-            myLine.Y2 = end.Y;
+            myLine.X1 = x_start;
+            myLine.Y1 = y_start;
+            myLine.X2 = x_end;
+            myLine.Y2 = y_end;
             myLine.HorizontalAlignment = HorizontalAlignment.Left;
             myLine.VerticalAlignment = VerticalAlignment.Center;
             c.Children.Add(myLine);
+
         }
 
         /// <summary>
@@ -79,12 +134,12 @@ namespace MomentDistributionCalculator.Helpers
         /// <param name="point">Point where tip of the arrow is placed</param>
         /// <param name="outline">Color of the arrow outline</param>
         /// <param name="len">Length of the arrow shaft</param>
-        public static void DrawArrowsNoFill(Canvas c, MDC_Node point, Color outline, double len = 30.0f)
+        public static void DrawArrowsNoFill(Canvas c, double x, double y, double z, Color outline, double len = 30.0f)
         {
-            DrawArrows(c, point, outline, Colors.Transparent);
+            DrawArrows(c, x, y, z, outline, Colors.Transparent);
         }
 
-        public static void DrawArrows(Canvas c, MDC_Node point, Color outline, Color fill, DirectionVectors dv = DirectionVectors.DIR_VERT_POS, double len = 30.0f)
+        public static void DrawArrows(Canvas c, double x, double y, double z, Color outline, Color fill, DirectionVectors dv = DirectionVectors.DIR_VERT_POS, double len = 30.0f)
         {
             // draw arrow shape
             Polygon triangle = new Polygon();
@@ -98,58 +153,13 @@ namespace MomentDistributionCalculator.Helpers
             double d4 = 2 * len / 3.0f;
             double angle = 0.0f;   // angle from point upward measured CCW in radians
 
-
-
-
-            switch (dv)
-            {
-                case DirectionVectors.DIR_VERT_NEG:
-                    //angle = Math.PI;
-                    break;
-                case DirectionVectors.DIR_VERT_POS:
-                    angle = 0;
-
-                    point = DrawingGeometryHelpers.Translate(point, 0.0f, -d4, 0.0f);
-                    break;
-                case DirectionVectors.DIR_HORIZ_NEG:
-                    break;
-                case DirectionVectors.DIR_HORIZ_POS:
-
-                    break;
-                case DirectionVectors.DIR_NORMAL_POS:
-                    break;
-                case DirectionVectors.DIR_NORMAL:
-                    break;
-                case DirectionVectors.NEG:
-                    break;
-                default:
-                    break;
-            }
-
-            // points to draw an upward arrow
-            MDC_Node p1 = point;
-            MDC_Node p2 = DrawingGeometryHelpers.Translate(p1, -d1, d3, 0.0f);
-            MDC_Node p3 = DrawingGeometryHelpers.Translate(p1, -d2, d3, 0.0f);
-            MDC_Node p4 = DrawingGeometryHelpers.Translate(p1, -d2, d4, 0.0f);
-            MDC_Node p5 = DrawingGeometryHelpers.Translate(p1, d2, d4, 0.0f);
-            MDC_Node p6 = DrawingGeometryHelpers.Translate(p1, d2, d3, 0.0f);
-            MDC_Node p7 = DrawingGeometryHelpers.Translate(p1, d1, d3, 0.0f);
-
-            //// Rotate to orientation
-            //p2 = DrawingGeometryHelpers.Rotate2D(p1, p2, angle);
-            //p3 = DrawingGeometryHelpers.Rotate2D(p1, p3, angle);
-            //p4 = DrawingGeometryHelpers.Rotate2D(p1, p4, angle);
-            //p5 = DrawingGeometryHelpers.Rotate2D(p1, p5, angle);
-            //p6 = DrawingGeometryHelpers.Rotate2D(p1, p6, angle);
-            //p7 = DrawingGeometryHelpers.Rotate2D(p1, p7, angle);
-
-            System.Windows.Point Point1 = new System.Windows.Point(p1.X, p1.Y);
-            System.Windows.Point Point2 = new System.Windows.Point(p2.X, p2.Y);
-            System.Windows.Point Point3 = new System.Windows.Point(p3.X, p3.Y);
-            System.Windows.Point Point4 = new System.Windows.Point(p4.X, p4.Y);
-            System.Windows.Point Point5 = new System.Windows.Point(p5.X, p5.Y);
-            System.Windows.Point Point6 = new System.Windows.Point(p6.X, p6.Y);
-            System.Windows.Point Point7 = new System.Windows.Point(p7.X, p7.Y);
+            System.Windows.Point Point1 = new System.Windows.Point(x, y);
+            System.Windows.Point Point2 = new System.Windows.Point(x-d1, y+d3);
+            System.Windows.Point Point3 = new System.Windows.Point(x-d2, y+d3);
+            System.Windows.Point Point4 = new System.Windows.Point(x-d2, y+d4);
+            System.Windows.Point Point5 = new System.Windows.Point(x+d2, y+d4);
+            System.Windows.Point Point6 = new System.Windows.Point(x+d2, y+d3);
+            System.Windows.Point Point7 = new System.Windows.Point(x+d1, y+d3);
 
             PointCollection polygonPoints = new PointCollection
             {
