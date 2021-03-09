@@ -1,11 +1,14 @@
 ﻿using MomentDistributionCalculator.Model;
+using MomentDistributionCalculator.Helpers;
+
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Controls;
 
 namespace MomentDistributionCalculator
 {
@@ -21,6 +24,9 @@ namespace MomentDistributionCalculator
         private bool m_RightMouseState = false;
         private MDC_Node m_FirstSelect = null;
         private MDC_Node m_SecondSelect = null;
+
+        private Point mouseLeftDownPoint;   // captures the cursor position on a left click on the canvas
+        private Shape rubberBand = null;
 
         private List<MDC_Beam> m_Model = null;
 
@@ -53,14 +59,18 @@ namespace MomentDistributionCalculator
         {
             InitializeComponent();
 
+            // Create the mouse envents
+            MainCanvas.MouseLeftButtonUp += MainCanvas_MouseLeftButtonUp;
+            MainCanvas.MouseLeftButtonDown += MainCanvas_MouseLeftButtonDown;
+            MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
+            MainCanvas.MouseMove += MainCanvas_MouseMove;
+
             DataContext = this;
 
             OnUserCreate();
             OnUserUpdate();
 
         }
-
-        
 
         private void OnUserCreate()
         {
@@ -147,6 +157,8 @@ namespace MomentDistributionCalculator
 
         private void OnUserUpdate()
         {
+
+
             // Draw the Model
             foreach (MDC_Beam item in Members)
             {
@@ -155,14 +167,61 @@ namespace MomentDistributionCalculator
 
         }
 
-        private void MainCanvas_MouseMove(object sender, MouseEventArgs e)
+        protected void MainCanvas_MouseMove(object sender, MouseEventArgs args)
         {
-            Point p = Mouse.GetPosition(MainCanvas);
-            Coords.Text = p.X.ToString() + " , " + p.Y.ToString();
+            if (MainCanvas.IsMouseCaptured)
+            {
+                Point currentPoint = args.GetPosition(MainCanvas);
+
+                if(rubberBand== null)
+                {
+                    rubberBand = new Rectangle();
+                    rubberBand.Stroke = new SolidColorBrush(Colors.Green);
+                    MainCanvas.Children.Add(rubberBand);
+                }
+
+                double width = Math.Abs(mouseLeftDownPoint.X - currentPoint.X);
+                double height = Math.Abs(mouseLeftDownPoint.Y - currentPoint.Y);
+                double left = Math.Min(mouseLeftDownPoint.X, currentPoint.X);
+                double top = Math.Min(mouseLeftDownPoint.Y, currentPoint.Y);
+
+                rubberBand.Width = width;
+                rubberBand.Height = height;
+                Canvas.SetLeft(rubberBand, left);
+                Canvas.SetTop(rubberBand, top);
+            }
+
+            //Coords.Text = p.X.ToString() + " , " + p.Y.ToString();
+
+            //if(LeftMouseState && !RightMouseState)
+            //{
+            //    MainCanvas.Children.Clear();
+            //    DrawingHelpers.DrawLine(MainCanvas, m_FirstSelect.X, m_FirstSelect.Y, p.X, p.Y, Colors.Green);
+            //}
+
+            //this.OnUserUpdate();
         }
 
-        private void MainCanvas_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        protected void MainCanvas_MouseLeftButtonDown(object sender, MouseEventArgs args)
         {
+            if (!MainCanvas.IsMouseCaptured)
+            {
+                mouseLeftDownPoint = args.GetPosition(MainCanvas);
+                MainCanvas.CaptureMouse();
+            }
+        }
+
+        private void MainCanvas_MouseLeftButtonUp(object sender, MouseEventArgs args)
+        {
+            if(MainCanvas.IsMouseCaptured && rubberBand != null)
+            {
+                MainCanvas.Children.Remove(rubberBand);
+                rubberBand = null;
+
+                MainCanvas.ReleaseMouseCapture();
+            }
+            //MessageBox.Show("Clicked");
+
             Point p = Mouse.GetPosition(MainCanvas);
 
             if (!LeftMouseState)
@@ -170,14 +229,15 @@ namespace MomentDistributionCalculator
                 MainCanvas.Background = Brushes.Gray;
                 m_FirstSelect = new MDC_Node(p.X, p.Y, 0.0f);
                 LeftMouseState = true;
-            } else if (!RightMouseState)
+            }
+            else if (!RightMouseState)
             {
                 m_SecondSelect = new MDC_Node(p.X, p.Y, 0.0f);
                 RightMouseState = true;
 
-            } 
-            
-            if(LeftMouseState && RightMouseState)
+            }
+
+            if (LeftMouseState && RightMouseState)
             {
                 // both buttons have been clicked, so create a beam member between the two
                 Members.Add(new MDC_Beam(m_FirstSelect, m_SecondSelect));
@@ -186,9 +246,10 @@ namespace MomentDistributionCalculator
                 MainCanvas.Background = Brushes.LightGray;
             }
 
-            
 
             this.OnUserUpdate();
+
+
         }
 
         private void MainCanvas_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
@@ -200,6 +261,9 @@ namespace MomentDistributionCalculator
             LeftMouseState = false;
             m_SecondSelect = null;
             RightMouseState = false;
+
+
+            this.OnUserUpdate();
 
         }
     }
