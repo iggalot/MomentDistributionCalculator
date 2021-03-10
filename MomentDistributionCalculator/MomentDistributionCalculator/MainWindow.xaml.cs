@@ -202,19 +202,13 @@ namespace MomentDistributionCalculator
 
         protected void MainCanvas_MouseMove(object sender, MouseEventArgs args)
         {
-            //if (rubberBand != null)
-            //{
-            //    MainCanvas.Children.Remove(rubberBand);
-            //    rubberBand = null;
-            //}
-
-            
             if (MainCanvas.IsMouseCaptured)
             {
                 Point currentPoint = args.GetPosition(MainCanvas);
 
                 if (rubberBandWindow == null)
                 {
+                    //MessageBox.Show("Creating new rubber band window");
                     rubberBandWindow = new Rectangle();
                     rubberBandWindow.Stroke = new SolidColorBrush(Colors.Green);
                     MainCanvas.Children.Add(rubberBandWindow);
@@ -234,7 +228,7 @@ namespace MomentDistributionCalculator
                 {
                     //if (FirstPointSelection == true && RightMouseState == false)
                     //{
-                        rubberBand = DrawingHelpers.DrawLine(MainCanvas, mouseLeftDownPoint.X, mouseLeftDownPoint.Y, currentPoint.X, currentPoint.Y, Colors.Green);
+                        rubberBand = DrawingHelpers.DrawLine(MainCanvas, 0, 0, currentPoint.X, currentPoint.Y, Colors.Green);
      
 
                     //    MouseLeftX_First = mouseLeftDownPoint.X - currentPoint.X;
@@ -247,15 +241,13 @@ namespace MomentDistributionCalculator
 
             args.Handled = true;
 
-
-
-            //this.OnUserUpdate();
         }
 
         protected void MainCanvas_MouseLeftButtonDown(object sender, MouseEventArgs args)
         {
             if (!MainCanvas.IsMouseCaptured)
             {
+                // Get the position of the mouse and store it
                 mouseLeftDownPoint = args.GetPosition(MainCanvas);
                 MainCanvas.CaptureMouse();
                 args.Handled = true;
@@ -268,6 +260,7 @@ namespace MomentDistributionCalculator
             {
                 if (rubberBandWindow != null)
                 {
+                    //MessageBox.Show("Deleting new rubber band window");
                     MainCanvas.Children.Remove(rubberBandWindow);
                     rubberBandWindow = null;
                 }
@@ -292,6 +285,7 @@ namespace MomentDistributionCalculator
                     args.Handled = true;
                 }
 
+                // If we have two clicks, create the nodes and make the beam member
                 if(bFirstPointSelected && bSecondPointSelected)
                 {
                     // Create the nodes
@@ -300,10 +294,13 @@ namespace MomentDistributionCalculator
 
                     // both buttons have been clicked, so create a beam member between the two
                     Members.Add(new MDC_Beam(node1, node2));
-
+                    
                     bFirstPointSelected = false;
                     bSecondPointSelected = false;
+                    
                 }
+
+                Mouse.Capture(null);   // release the main canvas mouse capture
 
                 this.OnUserUpdate();
             }

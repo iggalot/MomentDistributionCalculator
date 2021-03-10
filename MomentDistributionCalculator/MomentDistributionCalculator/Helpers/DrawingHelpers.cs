@@ -124,8 +124,6 @@ namespace MomentDistributionCalculator.Helpers
             myLine.HorizontalAlignment = HorizontalAlignment.Left;
             myLine.VerticalAlignment = VerticalAlignment.Center;
 
-            Canvas.SetLeft(myLine, x_start);
-            Canvas.SetTop(myLine, y_start);
             c.Children.Add(myLine);
 
             return myLine;
