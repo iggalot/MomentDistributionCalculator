@@ -9,6 +9,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Controls;
+using System.Windows.Threading;
+using System.Threading.Tasks;
 
 namespace MomentDistributionCalculator
 {
@@ -30,6 +32,14 @@ namespace MomentDistributionCalculator
         private Shape rubberBandWindow = null; // for the selection box on mouse down
 
         private List<MDC_Beam> m_Model = null;
+
+        /// <summary>
+        ///  A delegate for system idle.
+        /// </summary>
+        public delegate void OnApplicationIdle(bool status);
+
+
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -90,6 +100,18 @@ namespace MomentDistributionCalculator
             MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
             MainCanvas.MouseMove += MainCanvas_MouseMove;
 
+            // Create an Application Idle event
+            DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.SystemIdle);
+            timer.Tick += (s, e) => { OnIdle(true); };
+            timer.Interval = new TimeSpan(0, 0, 2);
+            timer.Start();
+
+            //this.Dispatcher.BeginInvoke(
+            //    System.Windows.Threading.DispatcherPriority.SystemIdle,
+            //    new OnApplicationIdle(OnIdle), true);
+
+ 
+
             bFirstPointSelected = false;
             bSecondPointSelected = false;
 
@@ -98,6 +120,24 @@ namespace MomentDistributionCalculator
             OnUserCreate();
             OnUserUpdate();
 
+        }
+
+        static int count = 0;
+
+        private async void OnIdle(bool status)
+        {
+            Console.WriteLine("In Idle Event");
+            await Task.Delay(1000);
+            Console.WriteLine(count);
+            count++;
+
+
+
+            //MessageBox.Show("In idle function");
+            // Create an Application Idle event
+            //this.Dispatcher.BeginInvoke(
+            //    System.Windows.Threading.DispatcherPriority.SystemIdle,
+            //    new OnApplicationIdle(OnIdle), true);
         }
 
         private void OnUserCreate()
@@ -214,6 +254,13 @@ namespace MomentDistributionCalculator
                     MainCanvas.Children.Add(rubberBandWindow);
                 }
 
+                if(rubberBand == null)
+                {
+                    rubberBand = new Rectangle();
+                    rubberBand.Stroke = new SolidColorBrush(Colors.Blue);
+                    MainCanvas.Children.Add(rubberBand);
+                }
+
                 double width = Math.Abs(mouseLeftDownPoint.X - currentPoint.X);
                 double height = Math.Abs(mouseLeftDownPoint.Y - currentPoint.Y);
                 double left = Math.Min(mouseLeftDownPoint.X, currentPoint.X);
@@ -224,20 +271,39 @@ namespace MomentDistributionCalculator
                 Canvas.SetLeft(rubberBandWindow, left);
                 Canvas.SetTop(rubberBandWindow, top);
 
-                if (rubberBand == null)
-                {
-                    //if (FirstPointSelection == true && RightMouseState == false)
-                    //{
-                        rubberBand = DrawingHelpers.DrawLine(MainCanvas, 0, 0, currentPoint.X, currentPoint.Y, Colors.Green);
-     
+                rubberBand.Width = 0.5*width;
+                rubberBand.Height = 0.5*height;
+                Canvas.SetLeft(rubberBand, left);
+                Canvas.SetTop(rubberBand, top);
 
-                    //    MouseLeftX_First = mouseLeftDownPoint.X - currentPoint.X;
-                    //    MouseLeftY_First = mouseLeftDownPoint.Y - currentPoint.Y;
-                    //}
-                }
+
+
 
                 Coords.Text = currentPoint.X.ToString() + " , " + currentPoint.Y.ToString();
             }
+
+
+
+            //if (bFirstPointSelected)
+            //{
+            //    Point p = args.GetPosition(MainCanvas);
+
+            //    if (rubberBand == null)
+            //    {
+            //        //if (FirstPointSelection == true && RightMouseState == false)
+            //        //{
+            //        rubberBand = DrawingHelpers.DrawLine(MainCanvas, MouseLeftX_First, MouseLeftX_Second, p.X, p.Y, Colors.Green);
+
+
+            //        //    MouseLeftX_First = mouseLeftDownPoint.X - currentPoint.X;
+            //        //    MouseLeftY_First = mouseLeftDownPoint.Y - currentPoint.Y;
+            //        //}
+            //    }
+               
+            //}
+
+
+
 
             args.Handled = true;
 
@@ -263,6 +329,13 @@ namespace MomentDistributionCalculator
                     //MessageBox.Show("Deleting new rubber band window");
                     MainCanvas.Children.Remove(rubberBandWindow);
                     rubberBandWindow = null;
+                }
+
+                if (rubberBand != null)
+                {
+                    //MessageBox.Show("Deleting new rubber band window");
+                    MainCanvas.Children.Remove(rubberBand);
+                    rubberBand = null;
                 }
 
                 Point p = args.GetPosition(MainCanvas);
