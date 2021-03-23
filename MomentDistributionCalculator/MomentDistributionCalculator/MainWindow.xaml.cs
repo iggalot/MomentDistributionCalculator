@@ -20,7 +20,7 @@ namespace MomentDistributionCalculator
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private const int APP_IDLE_DELAY = 1000;  // delay in milliseconds for a backgrgound thread
+        private const int APP_IDLE_DELAY = 10;  // delay in milliseconds for a backgrgound thread
 
         private const int NUM_NODES = 10; // number of nodes along the top of the structure
         private const int NUM_BEAMS = NUM_NODES - 1; // number of beams along the top of the structure
@@ -28,12 +28,12 @@ namespace MomentDistributionCalculator
         private bool m_bFirstPointSelected = false;
         private bool m_bSecondPointSelected = false;
         private bool m_bMouseHasMoved = false;  // has the mouse mved since we first clicked?
-        private Point m_FirstSelect;
-        private Point m_SecondSelect;
 
-        private Point mouseLeftDownPoint;   // captures the cursor position on a left click on the canvas
-        private Line rubberBand = null;    // for the beam snap rubber band
-        private Shape rubberBandWindow = null; // for the selection box on mouse down
+        private Point m_FirstLeftMouseDownPoint = new Point();   // captures the cursor position on a left click on the canvas
+        private Point m_SecondLeftMouseDownPoint = new Point();   // captures the cursor position on a left click on the canvas
+        private Point m_CurrentMouseLocation = new Point(); // the current mouse location
+        //private Line rubberBand = null;    // for the beam snap rubber band
+        //private Shape rubberBandWindow = null; // for the selection box on mouse down
 
         private List<MDC_Beam> m_Model = null;
 
@@ -41,9 +41,6 @@ namespace MomentDistributionCalculator
         ///  A delegate for system idle.
         /// </summary>
         public delegate void OnApplicationIdle(bool status);
-
-
-
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -58,47 +55,41 @@ namespace MomentDistributionCalculator
         public List<DrawingObject> MDC_DrawingObjects { get; set; }
 
         public List<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
-        public bool bFirstPointSelected 
+        public bool IsSelectedFirstPoint 
         { 
             get { return m_bFirstPointSelected; } 
-            set { m_bFirstPointSelected = value; OnPropertyChanged("bFirstPointSelected"); } 
+            set { m_bFirstPointSelected = value; OnPropertyChanged("IsSelectedFirstPoint"); } 
         }
 
-        public bool bSecondPointSelected
+        public bool IsSelectedSecondPoint
         {
             get { return m_bSecondPointSelected; }
-            set { m_bSecondPointSelected = value; OnPropertyChanged("bSecondPointSelected"); }
+            set { m_bSecondPointSelected = value; OnPropertyChanged("IsSelectedSecondPoint"); }
         }
 
-        public double MouseLeftX_First
+        public Point FirstLeftMouseDownPoint
         {
-            get { return m_FirstSelect.X; }
-            set { m_FirstSelect.X = value; OnPropertyChanged("MouseLeftX_First"); }
+            get { return m_FirstLeftMouseDownPoint; }
+            set { m_FirstLeftMouseDownPoint = value; OnPropertyChanged("FirstLeftMouseDownPoint"); }
         }
 
-        public double MouseLeftY_First
+        public Point SecondLeftMouseDownPoint
         {
-            get { return m_FirstSelect.Y; }
-            set { m_FirstSelect.Y = value; OnPropertyChanged("MouseLeftY_First"); }
+            get { return m_SecondLeftMouseDownPoint; }
+            set { m_SecondLeftMouseDownPoint = value; OnPropertyChanged("SecondLeftMouseDownPoint"); }
         }
 
-        public double MouseLeftX_Second
+        public Point CurrentMouseLocationPoint
         {
-            get { return m_SecondSelect.X; }
-            set { m_SecondSelect.X = value; OnPropertyChanged("MouseLeftX_Second"); }
-        }
-
-        public double MouseLeftY_Second
-        {
-            get { return m_SecondSelect.Y; }
-            set { m_SecondSelect.Y = value; OnPropertyChanged("MouseLeftY_Second"); }
+            get { return m_CurrentMouseLocation; }
+            set { m_CurrentMouseLocation = value; OnPropertyChanged("CurrentMouseLocationPoint"); }
         }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            // Create the mouse envents
+            // Create the mouse events
             MainCanvas.MouseLeftButtonUp += MainCanvas_MouseLeftButtonUp;
             MainCanvas.MouseLeftButtonDown += MainCanvas_MouseLeftButtonDown;
             MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
@@ -107,26 +98,32 @@ namespace MomentDistributionCalculator
             // Create an Application Idle event
             DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.SystemIdle);
             timer.Tick += (s, e) => { OnIdle(true); };
-            timer.Interval = new TimeSpan(0, 0, 2);
+            timer.Interval = new TimeSpan(0, 0, APP_IDLE_DELAY/1000);
             timer.Start();
  
             // Initialize whether or not a first point or a second point was selected.
-            bFirstPointSelected = false;
-            bSecondPointSelected = false;
+            IsSelectedFirstPoint = false;
+            IsSelectedSecondPoint = false;
 
             DataContext = this;
 
             OnUserCreate();
             OnUserUpdate();
-
         }
 
         static int count = 0;
 
+        /// <summary>
+        /// An idle process task that continuously redraws the screen.  
+        /// </summary>
+        /// <param name="status"></param>
         private async void OnIdle(bool status)
         {
             Console.WriteLine(count.ToString() + "In Idle Event");
             await Task.Delay(APP_IDLE_DELAY);
+
+            /// TODO:: Add a "screen is dirty" type of marker so that the screen doesn't update unless something has changed.
+            this.OnUserUpdate();  // now update
             count++;
         }
 
@@ -230,20 +227,16 @@ namespace MomentDistributionCalculator
             }
 
             // Draw helper features
-            if (bFirstPointSelected)
+            if (IsSelectedFirstPoint)
             {
                 // Draw the first marker node
-                DrawingHelpers.DrawCircle(MainCanvas, MouseLeftX_First, MouseLeftY_First, 15, Colors.Black, Colors.Blue);
+                DrawingHelpers.DrawCircle(MainCanvas, FirstLeftMouseDownPoint.X, FirstLeftMouseDownPoint.Y, 15, Colors.Black, Colors.Blue);
 
                 // If the first point is selected, draw a rubber band line
-                DrawingHelpers.DrawLine(MainCanvas, MouseLeftX_First, MouseLeftY_First, MouseLeftX_Second, MouseLeftY_Second, Colors.Aqua);
-            }
+                DrawingHelpers.DrawLine(MainCanvas, FirstLeftMouseDownPoint.X, FirstLeftMouseDownPoint.Y, CurrentMouseLocationPoint.X, CurrentMouseLocationPoint.Y, Colors.Aqua);
 
-            // Draw helper features
-            if (bSecondPointSelected)
-            {
-                // Draw the first marker node
-                DrawingHelpers.DrawCircle(MainCanvas, MouseLeftX_Second, MouseLeftY_Second, 15, Colors.Black, Colors.Blue);
+                // Draw a node at the current mouse location
+                DrawingHelpers.DrawCircle(MainCanvas, CurrentMouseLocationPoint.X, CurrentMouseLocationPoint.Y, 6, Colors.Black, Colors.Blue);
             }
         }
 
@@ -251,60 +244,38 @@ namespace MomentDistributionCalculator
         {
             if (MainCanvas.IsMouseCaptured)
             {
-                Point currentPoint = args.GetPosition(MainCanvas);
+                CurrentMouseLocationPoint = args.GetPosition(MainCanvas);
 
-                if (rubberBandWindow == null)
+                //if (rubberBandWindow == null)
+                //{
+                //    //MessageBox.Show("Creating new rubber band window");
+                //    rubberBandWindow = new Rectangle();
+                //    rubberBandWindow.Stroke = new SolidColorBrush(Colors.Green);
+                //    MainCanvas.Children.Add(rubberBandWindow);
+                //}
+
+                //double width = Math.Abs(m_FirstLeftMouseDownPoint.X - CurrentMouseLocationPoint.X);
+                //double height = Math.Abs(m_FirstLeftMouseDownPoint.Y - CurrentMouseLocationPoint.Y);
+                //double left = Math.Min(m_FirstLeftMouseDownPoint.X, CurrentMouseLocationPoint.X);
+                //double top = Math.Min(m_FirstLeftMouseDownPoint.Y, CurrentMouseLocationPoint.Y);
+
+                //rubberBandWindow.Width = width;
+                //rubberBandWindow.Height = height;
+                //Canvas.SetLeft(rubberBandWindow, left);
+                //Canvas.SetTop(rubberBandWindow, top);
+
+                // For the rubber band line
+                if (IsSelectedFirstPoint)
                 {
-                    //MessageBox.Show("Creating new rubber band window");
-                    rubberBandWindow = new Rectangle();
-                    rubberBandWindow.Stroke = new SolidColorBrush(Colors.Green);
-                    MainCanvas.Children.Add(rubberBandWindow);
-                }
-
-                
-                // Rubber band selection box
-                if(rubberBand == null)
-                {
-                    rubberBand = new Line();
-                    rubberBand.Stroke = new SolidColorBrush(Colors.Blue);
-                    MainCanvas.Children.Add(rubberBand);
-                }
-
-                double width = Math.Abs(mouseLeftDownPoint.X - currentPoint.X);
-                double height = Math.Abs(mouseLeftDownPoint.Y - currentPoint.Y);
-                double left = Math.Min(mouseLeftDownPoint.X, currentPoint.X);
-                double top = Math.Min(mouseLeftDownPoint.Y, currentPoint.Y);
-
-                rubberBandWindow.Width = width;
-                rubberBandWindow.Height = height;
-                Canvas.SetLeft(rubberBandWindow, left);
-                Canvas.SetTop(rubberBandWindow, top);
-
-  
-
-                // Rubber band line
-                if(bFirstPointSelected)
-                {
-                    rubberBand.X1 = MouseLeftX_First;
-                    rubberBand.Y1 = MouseLeftY_First;
-                    rubberBand.X2 = MouseLeftX_Second;
-                    rubberBand.Y2 = MouseLeftY_Second;
-                    MouseLeftX_Second = currentPoint.X;
-                    MouseLeftY_Second = currentPoint.Y;
-                    //Canvas.SetLeft(rubberBand, mouseLeftDownPoint.X);
-                    //Canvas.SetTop(rubberBand, mouseLeftDownPoint.Y);
                     m_bMouseHasMoved = true;
                 }
 
 
                 // Update the status window for the mouse coordinates
-                Coords.Text = currentPoint.X.ToString() + " , " + currentPoint.Y.ToString();
+                Coords.Text = CurrentMouseLocationPoint.X.ToString() + " , " + CurrentMouseLocationPoint.Y.ToString();
             }
 
             args.Handled = true;
-
-
-
         }
 
         protected void MainCanvas_MouseLeftButtonDown(object sender, MouseEventArgs args)
@@ -312,7 +283,7 @@ namespace MomentDistributionCalculator
             if (!MainCanvas.IsMouseCaptured)
             {
                 // Get the position of the mouse and store it
-                mouseLeftDownPoint = args.GetPosition(MainCanvas);
+                CurrentMouseLocationPoint = args.GetPosition(MainCanvas);
                 MainCanvas.CaptureMouse();
                 args.Handled = true;
             }
@@ -322,60 +293,54 @@ namespace MomentDistributionCalculator
         {
             if (MainCanvas.IsMouseCaptured)
             {
-                if (rubberBandWindow != null)
-                {
-                    //MessageBox.Show("Deleting new rubber band window");
-                    MainCanvas.Children.Remove(rubberBandWindow);
-                    rubberBandWindow = null;
-                }
+                //if (rubberBandWindow != null)
+                //{
+                //    //MessageBox.Show("Deleting new rubber band window");
+                //    MainCanvas.Children.Remove(rubberBandWindow);
+                //    rubberBandWindow = null;
+                //}
 
-                if (rubberBand != null)
-                {
-                    //MessageBox.Show("Deleting new rubber band window");
-                    MainCanvas.Children.Remove(rubberBand);
-                    rubberBand = null;
-                }
+                //if (rubberBand != null)
+                //{
+                //    //MessageBox.Show("Deleting new rubber band window");
+                //    MainCanvas.Children.Remove(rubberBand);
+                //    rubberBand = null;
+                //}
 
-                Point p = args.GetPosition(MainCanvas);
+                CurrentMouseLocationPoint = args.GetPosition(MainCanvas);
 
-                if(!bFirstPointSelected)
+                if(!IsSelectedFirstPoint)
                 {
                     MainCanvas.Background = Brushes.Gray;
-                    MouseLeftX_First = p.X;
-                    MouseLeftY_First = p.Y;
-                    MouseLeftX_Second = p.X;
-                    MouseLeftY_Second = p.Y;
-
-                    bFirstPointSelected = true;
+                    FirstLeftMouseDownPoint = CurrentMouseLocationPoint;
+                    SecondLeftMouseDownPoint = CurrentMouseLocationPoint;  // for the first click assign the second point to be the same as the first.
+                    IsSelectedFirstPoint = true;
                     args.Handled = true;
                 }
-                else if ((!bSecondPointSelected) ) {
+                else if ((!IsSelectedSecondPoint) ) {
                     MainCanvas.Background = Brushes.LightGray;
-                    MouseLeftX_Second = p.X;
-                    MouseLeftY_Second = p.Y;
-                    bSecondPointSelected = true;
+                    SecondLeftMouseDownPoint = CurrentMouseLocationPoint;
+                    IsSelectedSecondPoint = true;
                     args.Handled = true;
                 }
 
                 // If we have two clicks, create the nodes and make the beam member
-                if(bFirstPointSelected && bSecondPointSelected)
+                if(IsSelectedFirstPoint && IsSelectedSecondPoint)
                 {
                     // Create the nodes
-                    MDC_Node node1 = new MDC_Node(MouseLeftX_First, MouseLeftY_First, 0.0f);
-                    MDC_Node node2 = new MDC_Node(MouseLeftX_Second, MouseLeftY_Second, 0.0f);
+                    MDC_Node node1 = new MDC_Node(FirstLeftMouseDownPoint.X, FirstLeftMouseDownPoint.Y, 0.0f);
+                    MDC_Node node2 = new MDC_Node(SecondLeftMouseDownPoint.X, SecondLeftMouseDownPoint.Y, 0.0f);
 
                     // both buttons have been clicked, so create a beam member between the two
                     Members.Add(new MDC_Beam(node1, node2));
                     
-                    bFirstPointSelected = false;
-                    bSecondPointSelected = false;
-                    MouseLeftX_First = 0.0;
-                    MouseLeftY_First = 0.0;
-                    MouseLeftX_Second = 0.0;
-                    MouseLeftY_Second = 0.0;
-                    m_bMouseHasMoved = false;
+                    IsSelectedFirstPoint = false;
+                    IsSelectedSecondPoint = false;
 
- 
+                    // Clear our points and reset our move status
+                    FirstLeftMouseDownPoint = new Point(0.0,0.0);
+                    SecondLeftMouseDownPoint = new Point(0.0, 0.0);
+                    m_bMouseHasMoved = false; 
                 }
 
                 //Mouse.Capture(null);   // release the main canvas mouse capture
@@ -389,9 +354,8 @@ namespace MomentDistributionCalculator
             MainCanvas.Background = Brushes.LightGray;
 
             // clear the first and second click
-            bFirstPointSelected = false;
-            bSecondPointSelected = false;
-
+            IsSelectedFirstPoint = false;
+            IsSelectedSecondPoint = false;
 
             this.OnUserUpdate();
 

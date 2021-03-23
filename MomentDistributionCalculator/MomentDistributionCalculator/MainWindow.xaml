@@ -13,19 +13,24 @@
                 MouseRightButtonUp="MainCanvas_MouseRightButtonUp"
                 Height="450" Width="800" Background="LightGray"/>
         <StackPanel Orientation="Horizontal">
-            <TextBox Name="LeftState" Text="{Binding bFirstPointSelected}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <TextBox Name="LeftState" Text="{Binding IsSelectedFirstPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
-            <TextBox Name="RightState" Text="{Binding bSecondPointSelected}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <TextBox Name="RightState" Text="{Binding IsSelectedSecondPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
             <TextBox Name="Coords" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
-            <TextBox Name="FirstMouseCoords_X" Text="{Binding MouseLeftX_First}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <TextBox Name="FirstMouseCoords_X" Text="{Binding FirstLeftMouseDownPoint.X}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
-            <TextBox Name="FirstMouseCoords_Y" Text="{Binding MouseLeftY_First}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <TextBox Name="FirstMouseCoords_Y" Text="{Binding FirstLeftMouseDownPoint.Y}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
-            <TextBox Name="SecondMouseCoords_X" Text="{Binding MouseLeftX_Second}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <TextBox Name="SecondMouseCoords_X" Text="{Binding SecondLeftMouseDownPoint.X}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
-            <TextBox Name="SecondMouseCoords_Y" Text="{Binding MouseLeftY_Second}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <TextBox Name="SecondMouseCoords_Y" Text="{Binding SecondLeftMouseDownPoint.Y}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+
+
+            <TextBox Name="CurrentMouseCoords_X" Text="{Binding CurrentMouseLocationPoint.X}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+
+            <TextBox Name="CurrentMouseCoords_Y" Text="{Binding CurrentMouseLocationPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
         </StackPanel>
 
