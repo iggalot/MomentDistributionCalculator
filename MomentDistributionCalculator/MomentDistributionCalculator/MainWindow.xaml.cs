@@ -11,6 +11,7 @@ using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace MomentDistributionCalculator
 {
@@ -19,16 +20,19 @@ namespace MomentDistributionCalculator
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        private const int APP_IDLE_DELAY = 1000;  // delay in milliseconds for a backgrgound thread
+
         private const int NUM_NODES = 10; // number of nodes along the top of the structure
         private const int NUM_BEAMS = NUM_NODES - 1; // number of beams along the top of the structure
 
         private bool m_bFirstPointSelected = false;
         private bool m_bSecondPointSelected = false;
+        private bool m_bMouseHasMoved = false;  // has the mouse mved since we first clicked?
         private Point m_FirstSelect;
         private Point m_SecondSelect;
 
         private Point mouseLeftDownPoint;   // captures the cursor position on a left click on the canvas
-        private Shape rubberBand = null;    // for the beam snap rubber band
+        private Line rubberBand = null;    // for the beam snap rubber band
         private Shape rubberBandWindow = null; // for the selection box on mouse down
 
         private List<MDC_Beam> m_Model = null;
@@ -105,13 +109,8 @@ namespace MomentDistributionCalculator
             timer.Tick += (s, e) => { OnIdle(true); };
             timer.Interval = new TimeSpan(0, 0, 2);
             timer.Start();
-
-            //this.Dispatcher.BeginInvoke(
-            //    System.Windows.Threading.DispatcherPriority.SystemIdle,
-            //    new OnApplicationIdle(OnIdle), true);
-
  
-
+            // Initialize whether or not a first point or a second point was selected.
             bFirstPointSelected = false;
             bSecondPointSelected = false;
 
@@ -126,18 +125,9 @@ namespace MomentDistributionCalculator
 
         private async void OnIdle(bool status)
         {
-            Console.WriteLine("In Idle Event");
-            await Task.Delay(1000);
-            Console.WriteLine(count);
+            Console.WriteLine(count.ToString() + "In Idle Event");
+            await Task.Delay(APP_IDLE_DELAY);
             count++;
-
-
-
-            //MessageBox.Show("In idle function");
-            // Create an Application Idle event
-            //this.Dispatcher.BeginInvoke(
-            //    System.Windows.Threading.DispatcherPriority.SystemIdle,
-            //    new OnApplicationIdle(OnIdle), true);
         }
 
         private void OnUserCreate()
@@ -230,7 +220,8 @@ namespace MomentDistributionCalculator
 
         private void OnUserUpdate()
         {
-
+            // Clear the canvas
+            MainCanvas.Children.Clear();
 
             // Draw the Model
             foreach (MDC_Beam item in Members)
@@ -238,6 +229,22 @@ namespace MomentDistributionCalculator
                 item.Draw(MainCanvas);
             }
 
+            // Draw helper features
+            if (bFirstPointSelected)
+            {
+                // Draw the first marker node
+                DrawingHelpers.DrawCircle(MainCanvas, MouseLeftX_First, MouseLeftY_First, 15, Colors.Black, Colors.Blue);
+
+                // If the first point is selected, draw a rubber band line
+                DrawingHelpers.DrawLine(MainCanvas, MouseLeftX_First, MouseLeftY_First, MouseLeftX_Second, MouseLeftY_Second, Colors.Aqua);
+            }
+
+            // Draw helper features
+            if (bSecondPointSelected)
+            {
+                // Draw the first marker node
+                DrawingHelpers.DrawCircle(MainCanvas, MouseLeftX_Second, MouseLeftY_Second, 15, Colors.Black, Colors.Blue);
+            }
         }
 
         protected void MainCanvas_MouseMove(object sender, MouseEventArgs args)
@@ -254,9 +261,11 @@ namespace MomentDistributionCalculator
                     MainCanvas.Children.Add(rubberBandWindow);
                 }
 
+                
+                // Rubber band selection box
                 if(rubberBand == null)
                 {
-                    rubberBand = new Rectangle();
+                    rubberBand = new Line();
                     rubberBand.Stroke = new SolidColorBrush(Colors.Blue);
                     MainCanvas.Children.Add(rubberBand);
                 }
@@ -271,41 +280,30 @@ namespace MomentDistributionCalculator
                 Canvas.SetLeft(rubberBandWindow, left);
                 Canvas.SetTop(rubberBandWindow, top);
 
-                rubberBand.Width = 0.5*width;
-                rubberBand.Height = 0.5*height;
-                Canvas.SetLeft(rubberBand, left);
-                Canvas.SetTop(rubberBand, top);
+  
+
+                // Rubber band line
+                if(bFirstPointSelected)
+                {
+                    rubberBand.X1 = MouseLeftX_First;
+                    rubberBand.Y1 = MouseLeftY_First;
+                    rubberBand.X2 = MouseLeftX_Second;
+                    rubberBand.Y2 = MouseLeftY_Second;
+                    MouseLeftX_Second = currentPoint.X;
+                    MouseLeftY_Second = currentPoint.Y;
+                    //Canvas.SetLeft(rubberBand, mouseLeftDownPoint.X);
+                    //Canvas.SetTop(rubberBand, mouseLeftDownPoint.Y);
+                    m_bMouseHasMoved = true;
+                }
 
 
-
-
+                // Update the status window for the mouse coordinates
                 Coords.Text = currentPoint.X.ToString() + " , " + currentPoint.Y.ToString();
             }
 
-
-
-            //if (bFirstPointSelected)
-            //{
-            //    Point p = args.GetPosition(MainCanvas);
-
-            //    if (rubberBand == null)
-            //    {
-            //        //if (FirstPointSelection == true && RightMouseState == false)
-            //        //{
-            //        rubberBand = DrawingHelpers.DrawLine(MainCanvas, MouseLeftX_First, MouseLeftX_Second, p.X, p.Y, Colors.Green);
-
-
-            //        //    MouseLeftX_First = mouseLeftDownPoint.X - currentPoint.X;
-            //        //    MouseLeftY_First = mouseLeftDownPoint.Y - currentPoint.Y;
-            //        //}
-            //    }
-               
-            //}
-
-
-
-
             args.Handled = true;
+
+
 
         }
 
@@ -345,15 +343,16 @@ namespace MomentDistributionCalculator
                     MainCanvas.Background = Brushes.Gray;
                     MouseLeftX_First = p.X;
                     MouseLeftY_First = p.Y;
-                    DrawingHelpers.DrawCircle(MainCanvas, p.X, p.Y, 15, Colors.Black, Colors.Blue);
+                    MouseLeftX_Second = p.X;
+                    MouseLeftY_Second = p.Y;
+
                     bFirstPointSelected = true;
                     args.Handled = true;
                 }
-                else if (!bSecondPointSelected){
+                else if ((!bSecondPointSelected) ) {
                     MainCanvas.Background = Brushes.LightGray;
                     MouseLeftX_Second = p.X;
                     MouseLeftY_Second = p.Y;
-                    DrawingHelpers.DrawCircle(MainCanvas, p.X, p.Y, 15, Colors.Black, Colors.LightBlue);
                     bSecondPointSelected = true;
                     args.Handled = true;
                 }
@@ -370,10 +369,16 @@ namespace MomentDistributionCalculator
                     
                     bFirstPointSelected = false;
                     bSecondPointSelected = false;
-                    
+                    MouseLeftX_First = 0.0;
+                    MouseLeftY_First = 0.0;
+                    MouseLeftX_Second = 0.0;
+                    MouseLeftY_Second = 0.0;
+                    m_bMouseHasMoved = false;
+
+ 
                 }
 
-                Mouse.Capture(null);   // release the main canvas mouse capture
+                //Mouse.Capture(null);   // release the main canvas mouse capture
 
                 this.OnUserUpdate();
             }
