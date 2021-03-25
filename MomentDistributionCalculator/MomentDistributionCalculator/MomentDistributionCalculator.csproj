@@ -81,6 +81,7 @@
     <Compile Include="Helpers\DrawingGeometryHelpers.cs" />
     <Compile Include="Model\DrawingObject.cs" />
     <Compile Include="Model\MDC_Beam.cs" />
+    <Compile Include="Model\MDC_Grid.cs" />
     <Compile Include="Model\MDC_Node.cs" />
     <Compile Include="Model\MDC_Text.cs" />
     <Compile Include="Model\MemberDistributedLoad.cs" />

@@ -53,6 +53,7 @@ namespace MomentDistributionCalculator
         }
 
         public List<DrawingObject> MDC_DrawingObjects { get; set; }
+        public MDC_Grid MainGrid { get; set; }
 
         public List<MDC_Beam> Members { get { return m_Model; } set { m_Model = value; } }
         public bool IsSelectedFirstPoint 
@@ -147,11 +148,24 @@ namespace MomentDistributionCalculator
             double startZ = centerZ;
             double endZ = centerZ;
 
+            // Create our drawing grid object
+            MainGrid = new MDC_Grid(20, 10, MainCanvas.Width, MainCanvas.Height, Colors.DarkGray);
+            MDC_DrawingObjects.Add(MainGrid);
 
             //// Draws a dummy structure
             //DummyStructure(len, startX, endX, startY, endY, startZ, endZ);
         }
 
+        /// <summary>
+        /// Utility function to autogenerate a default model.
+        /// </summary>
+        /// <param name="len"></param>
+        /// <param name="startX"></param>
+        /// <param name="endX"></param>
+        /// <param name="startY"></param>
+        /// <param name="endY"></param>
+        /// <param name="startZ"></param>
+        /// <param name="endZ"></param>
         private void DummyStructure(double len, double startX, double endX, double startY, double endY, double startZ, double endZ)
         {
             MDC_Node start = new MDC_Node(startX, startY, startZ);
@@ -220,16 +234,10 @@ namespace MomentDistributionCalculator
             // Clear the canvas
             MainCanvas.Children.Clear();
 
-            // Draw the background grid
-            for (int i= 0; i < 20; i++)
+            foreach (DrawingObject item in MDC_DrawingObjects)
             {
-                // Vertical grid lines
-                DrawingHelpers.DrawLine(MainCanvas, i * 20, 0, i * 20, 400, Colors.DarkGray, new DoubleCollection() { 3, 3});
-                // Horizontal grid lines
-                DrawingHelpers.DrawLine(MainCanvas, 0, i * 20, 400, i *20, Colors.DarkGray, new DoubleCollection() { 3, 3 });
-
+                item.Draw(MainCanvas);
             }
-            
 
             // Draw the Model
             foreach (MDC_Beam item in Members)
