@@ -220,6 +220,17 @@ namespace MomentDistributionCalculator
             // Clear the canvas
             MainCanvas.Children.Clear();
 
+            // Draw the background grid
+            for (int i= 0; i < 20; i++)
+            {
+                // Vertical grid lines
+                DrawingHelpers.DrawLine(MainCanvas, i * 20, 0, i * 20, 400, Colors.DarkGray, new DoubleCollection() { 3, 3});
+                // Horizontal grid lines
+                DrawingHelpers.DrawLine(MainCanvas, 0, i * 20, 400, i *20, Colors.DarkGray, new DoubleCollection() { 3, 3 });
+
+            }
+            
+
             // Draw the Model
             foreach (MDC_Beam item in Members)
             {
@@ -330,6 +341,8 @@ namespace MomentDistributionCalculator
                     // Create the nodes
                     MDC_Node node1 = new MDC_Node(FirstLeftMouseDownPoint.X, FirstLeftMouseDownPoint.Y, 0.0f);
                     MDC_Node node2 = new MDC_Node(SecondLeftMouseDownPoint.X, SecondLeftMouseDownPoint.Y, 0.0f);
+
+                    //node1.Update();
 
                     // both buttons have been clicked, so create a beam member between the two
                     Members.Add(new MDC_Beam(node1, node2));

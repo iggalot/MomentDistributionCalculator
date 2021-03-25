@@ -7,6 +7,11 @@ namespace MomentDistributionCalculator.Model
     {
         private MemberDistributedLoad m_BoundingBox = null;
 
+        public DrawingObject()
+        {
+
+        }
+
         public virtual void Draw(Canvas c) { }
     }
 }

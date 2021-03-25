@@ -21,18 +21,18 @@ namespace MomentDistributionCalculator.Helpers
     public static class DrawingHelpers
     {
         // Draws a transparent filled circle at an MDC_Node location
-        public static void DrawCircleHollow(Canvas c, MDC_Node n, double r, Color color)
+        public static Shape DrawCircleHollow(Canvas c, MDC_Node n, double r, Color color)
         {
-            DrawCircle(c, n.X, n.Y, r, color, Colors.Transparent);
+            return DrawCircle(c, n.X, n.Y, r, color, Colors.Transparent);
         }
 
         // Draws a transparent filled circle at an MDC_Node location
-        public static void DrawCircleHollow(Canvas c, double x, double y, double r, Color color)
+        public static Shape DrawCircleHollow(Canvas c, double x, double y, double r, Color color)
         {
-            DrawCircle(c, x, y, r, color, Colors.Transparent);
+            return DrawCircle(c, x, y, r, color, Colors.Transparent);
         }
 
-        public static void DrawCircle(Canvas c, double x, double y, double r, Color outline, Color fill)
+        public static Shape DrawCircle(Canvas c, double x, double y, double r, Color outline, Color fill)
         {
             // Draw a circle node
             Ellipse myEllipse = new Ellipse();
@@ -49,6 +49,8 @@ namespace MomentDistributionCalculator.Helpers
             myEllipse.VerticalAlignment = VerticalAlignment.Center;
 
             c.Children.Add(myEllipse);
+
+            return myEllipse;
         }
         /// <summary>
         /// Draws a circle at an MDC_Node reference
@@ -58,9 +60,9 @@ namespace MomentDistributionCalculator.Helpers
         /// <param name="r"></param>
         /// <param name="outline"></param>
         /// <param name="fill"></param>
-        public static void DrawCircle(Canvas c, MDC_Node n, double r, Color outline, Color fill)
+        public static Shape DrawCircle(Canvas c, MDC_Node n, double r, Color outline, Color fill)
         {
-            DrawCircle(c, n.X, n.Y, r, outline, fill);
+            return DrawCircle(c, n.X, n.Y, r, outline, fill);
         }
 
         /// <summary>
@@ -112,7 +114,7 @@ namespace MomentDistributionCalculator.Helpers
             DrawLine(c, start.X, start.Y, end.X, end.Y, color);
         }
 
-        public static Shape DrawLine(Canvas c, double x_start, double y_start, double x_end, double y_end, Color color)
+        public static Shape DrawLine(Canvas c, double x_start, double y_start, double x_end, double y_end, Color color, DoubleCollection dashArray= null)
         {
             Line myLine = new Line();
             myLine.Stroke = new SolidColorBrush(color);
@@ -123,6 +125,8 @@ namespace MomentDistributionCalculator.Helpers
             myLine.Y2 = y_end;
             myLine.HorizontalAlignment = HorizontalAlignment.Left;
             myLine.VerticalAlignment = VerticalAlignment.Center;
+
+            myLine.StrokeDashArray = dashArray;
 
             c.Children.Add(myLine);
 
