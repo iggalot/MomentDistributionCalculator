@@ -90,22 +90,6 @@ namespace MomentDistributionCalculator
         {
             InitializeComponent();
 
-            // Create the mouse events
-            MainCanvas.MouseLeftButtonUp += MainCanvas_MouseLeftButtonUp;
-            MainCanvas.MouseLeftButtonDown += MainCanvas_MouseLeftButtonDown;
-            MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
-            MainCanvas.MouseMove += MainCanvas_MouseMove;
-
-            // Create an Application Idle event
-            DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.SystemIdle);
-            timer.Tick += (s, e) => { OnIdle(true); };
-            timer.Interval = new TimeSpan(0, 0, APP_IDLE_DELAY/1000);
-            timer.Start();
- 
-            // Initialize whether or not a first point or a second point was selected.
-            IsSelectedFirstPoint = false;
-            IsSelectedSecondPoint = false;
-
             DataContext = this;
 
             OnUserCreate();
@@ -132,6 +116,22 @@ namespace MomentDistributionCalculator
         {
             Members = new List<MDC_Beam>();
             MDC_DrawingObjects = new List<DrawingObject>();
+
+            // Create the mouse events
+            MainCanvas.MouseLeftButtonUp += MainCanvas_MouseLeftButtonUp;
+            MainCanvas.MouseLeftButtonDown += MainCanvas_MouseLeftButtonDown;
+            MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
+            MainCanvas.MouseMove += MainCanvas_MouseMove;
+
+            // Create an Application Idle event
+            DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.SystemIdle);
+            timer.Tick += (s, e) => { OnIdle(true); };
+            timer.Interval = new TimeSpan(0, 0, APP_IDLE_DELAY / 1000);
+            timer.Start();
+
+            // Initialize whether or not a first point or a second point was selected.
+            IsSelectedFirstPoint = false;
+            IsSelectedSecondPoint = false;
 
             // Create some nodes
             double len = (MainCanvas.Width) / (NUM_NODES+1);
