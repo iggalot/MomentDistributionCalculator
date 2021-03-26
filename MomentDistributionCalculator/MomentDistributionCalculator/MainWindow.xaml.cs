@@ -122,6 +122,7 @@ namespace MomentDistributionCalculator
             MainCanvas.MouseLeftButtonDown += MainCanvas_MouseLeftButtonDown;
             MainCanvas.MouseRightButtonUp += MainCanvas_MouseRightButtonUp;
             MainCanvas.MouseMove += MainCanvas_MouseMove;
+            MainCanvas.MouseWheel += MainCanvas_MouseWheel;
 
             // Create an Application Idle event
             DispatcherTimer timer = new DispatcherTimer(DispatcherPriority.SystemIdle);
@@ -154,6 +155,12 @@ namespace MomentDistributionCalculator
 
             //// Draws a dummy structure
             //DummyStructure(len, startX, endX, startY, endY, startZ, endZ);
+        }
+
+        private void MainCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            //TODO:  Mouse wheel zoom in and out...
+            MessageBox.Show("Mouse Wheel event activated -- do zooming stuff here");
         }
 
         /// <summary>
@@ -346,6 +353,7 @@ namespace MomentDistributionCalculator
                 // If we have two clicks, create the nodes and make the beam member
                 if(IsSelectedFirstPoint && IsSelectedSecondPoint)
                 {
+                    // TODO: search if a node is already in the model with the same coordinates.  If so, use that node, otherwise make a new one.
                     // Create the nodes
                     MDC_Node node1 = new MDC_Node(FirstLeftMouseDownPoint.X, FirstLeftMouseDownPoint.Y, 0.0f);
                     MDC_Node node2 = new MDC_Node(SecondLeftMouseDownPoint.X, SecondLeftMouseDownPoint.Y, 0.0f);
