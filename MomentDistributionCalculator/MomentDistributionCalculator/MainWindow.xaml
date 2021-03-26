@@ -5,14 +5,20 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MomentDistributionCalculator"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="850">
+        Title="MainWindow">
     <Grid>
-        <Canvas Name="MainCanvas" 
-                MouseMove="MainCanvas_MouseMove" 
-                MouseLeftButtonUp="MainCanvas_MouseLeftButtonUp"
-                MouseRightButtonUp="MainCanvas_MouseRightButtonUp"
-                Height="450" Width="800" Background="LightGray"/>
-        <StackPanel Orientation="Horizontal">
+        <StackPanel Orientation="Vertical">
+        <Viewbox Name="CanvasViewBox"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 Stretch="Fill">
+            <Canvas Name="MainCanvas" 
+                    Background="LightGray"/>
+        </Viewbox>
+        <TextBox Name="Scale" Text="{Binding ScaleFactorX}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+        <TextBox Name="Count" Text="{Binding MainGrid.LineCount}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+
+<StackPanel Orientation="Horizontal">
             <TextBox Name="LeftState" Text="{Binding IsSelectedFirstPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
             <TextBox Name="RightState" Text="{Binding IsSelectedSecondPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
@@ -34,6 +40,6 @@
 
         </StackPanel>
 
-
+        </StackPanel>
     </Grid>
 </Window>
