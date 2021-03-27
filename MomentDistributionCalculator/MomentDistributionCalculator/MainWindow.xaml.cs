@@ -41,6 +41,8 @@ namespace MomentDistributionCalculator
         //private Shape rubberBandWindow = null; // for the selection box on mouse down
 
         private double m_scaleFactor  = 1.0;  // the scale factor to apply to the canvas
+
+        private string m_statusMessage = "";
 //        private ScaleTransform m_scaleTransform = new ScaleTransform(1.0,1.0);  // the render transform to apply to the canvas
 
         private List<MDC_Beam> m_Model = null;
@@ -72,7 +74,17 @@ namespace MomentDistributionCalculator
                 OnPropertyChanged("ScaleFactorX");
             }
         }
-        
+
+        public string StatusMessage
+        {
+            get { return m_statusMessage; }
+            set
+            {
+                m_statusMessage = value;
+                OnPropertyChanged("StatusMessage");
+            }
+        }
+
         public bool IsSelectedFirstPoint 
         { 
             get { return m_bFirstPointSelected; } 
@@ -174,6 +186,7 @@ namespace MomentDistributionCalculator
             // Create our drawing grid object
             MainGrid = new MDC_Grid(20, 10, MainCanvas.Width, MainCanvas.Height, Colors.DarkGray);
             MDC_DrawingObjects.Add(MainGrid);
+            MainCanvas.Children.Add(MainGrid);
 
             //// Draws a dummy structure
             //DummyStructure(len, startX, endX, startY, endY, startZ, endZ);
@@ -410,37 +423,39 @@ namespace MomentDistributionCalculator
 
         private void MainCanvas_MouseWheel(object sender, MouseWheelEventArgs e)
         {
-            //TODO:  Mouse wheel zoom in and out...
+            //TODO:  Mouse wheel zoom in and out...come up with a better way!
             if (e.Delta > 0)
             {
-                ScaleFactorX *= 2.0;
+                ScaleFactorX = ScaleFactorX * 2.0;
             }
             else if (e.Delta < 0)
             {
-                ScaleFactorX *= 0.5;
+                ScaleFactorX = ScaleFactorX * 0.5;
             }
             else return;
 
-            MainCanvas.Width = CANVAS_WIDTH * m_scaleFactor;
-            MainCanvas.Height = CANVAS_HEIGHT * m_scaleFactor;
+            // cap the amount we can zoom in and out -- done this way for performance reasons
+            if (ScaleFactorX > 10 || ScaleFactorX < 0.1)
+            {
+                StatusMessage = "Zoom limits reached";
+                return;
+            }
+            else
+            {
+                StatusMessage = String.Empty;
+            }
+
+            MainCanvas.Width = CANVAS_WIDTH * ScaleFactorX;
+            MainCanvas.Height = CANVAS_HEIGHT * ScaleFactorX;
 
             // Remove original grid object
- //           MainCanvas.Children.Remove(MainGrid);
- //           this.MDC_DrawingObjects.Remove(MainGrid);
-  //          // Recreate our grid object
-            MainGrid.ScaleGrid(m_scaleFactor);
-            //MainGrid = new MDC_Grid(40, 20, CANVAS_WIDTH, CANVAS_HEIGHT, Colors.DarkGray);
-//            this.MDC_DrawingObjects.Add(MainGrid);
-  //          //            MainCanvas.RenderTransform = new TranslateTransform(((-CANVAS_WIDTH * m_scaleFactor) / 2.0),(-CANVAS_HEIGHT * m_scaleFactor / 2.0));
-  ////          MainGrid = new MDC_Grid(20, 10, CANVAS_WIDTH*m_scaleFactor, CANVAS_HEIGHT * m_scaleFactor, Colors.DarkGray);
-  ////          this.MDC_DrawingObjects.Add(MainGrid);
-  //          // Scale the canvas object
-  //          MainCanvas.Width = CANVAS_WIDTH * m_scaleTransform.ScaleX;
-  //          MainCanvas.Height = CANVAS_HEIGHT * m_scaleTransform.ScaleY;
+//            this.MDC_DrawingObjects.Remove(MainGrid);
 
- //           m_scaleTransform = new ScaleTransform(m_scaleFactor, m_scaleFactor);
- //           CanvasViewBox.RenderTransform = m_scaleTransform;
-            //MainCanvas.RenderTransformOrigin = new Point(0,0);
+            // Recreate our grid object
+            MainGrid.ScaleGrid(ScaleFactorX);
+//            MainGrid = new MDC_Grid(MainGrid.XSpacing, MainGrid.YSpacing*ScaleFactorX, MainCanvas.Width, MainCanvas.Height, Colors.DarkGray);
+//            this.MDC_DrawingObjects.Add(MainGrid);
+
             this.OnUserUpdate();
         }
     }

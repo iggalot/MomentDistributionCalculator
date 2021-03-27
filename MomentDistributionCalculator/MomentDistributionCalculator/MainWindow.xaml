@@ -12,13 +12,35 @@
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  Stretch="Fill">
-            <Canvas Name="MainCanvas" 
-                    Background="LightGray"/>
-        </Viewbox>
-        <TextBox Name="Scale" Text="{Binding ScaleFactorX}" Height="25" Width="100" VerticalAlignment="Bottom"/>
-        <TextBox Name="Count" Text="{Binding MainGrid.LineCount}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+                <Canvas Name="MainCanvas" 
+                    Background="LightGray"
+                    ClipToBounds="True"
+                        >
 
-<StackPanel Orientation="Horizontal">
+                </Canvas>
+            </Viewbox>
+            <TextBox Name="StatusBar" Text="{Binding StatusMessage}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Grid Size"  Height="25" Width="60" VerticalAlignment="Bottom"/>
+                <TextBox Name="GridX" Text="{Binding MainGrid.XSpacing}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+                <TextBlock Text=" , "  Height="25" Width="10" VerticalAlignment="Bottom"/>
+                <TextBox Name="GridY" Text="{Binding MainGrid.YSpacing}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Canvas Size"  Height="25" Width="60" VerticalAlignment="Bottom"/>
+                <TextBox Name="CanvasWidth" Text="{Binding MainGrid.GridWidth}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+                <TextBlock Text=" , "  Height="25" Width="10" VerticalAlignment="Bottom"/>
+                <TextBox Name="CanvasHeight" Text="{Binding MainGrid.GridHeight}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Scale: "  Height="25" Width="60" VerticalAlignment="Bottom"/>
+                <TextBox Name="Scale" Text="{Binding ScaleFactorX}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="#GridLines: "  Height="25" Width="60" VerticalAlignment="Bottom"/>
+                <TextBox Name="Count" Text="{Binding MainGrid.LineCount}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
             <TextBox Name="LeftState" Text="{Binding IsSelectedFirstPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
             <TextBox Name="RightState" Text="{Binding IsSelectedSecondPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
