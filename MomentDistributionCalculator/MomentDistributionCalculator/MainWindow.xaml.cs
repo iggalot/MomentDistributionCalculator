@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Threading.Tasks;
 using System.Threading;
+using MathNet.Numerics.LinearAlgebra;
 
 namespace MomentDistributionCalculator
 {
@@ -46,6 +47,10 @@ namespace MomentDistributionCalculator
 //        private ScaleTransform m_scaleTransform = new ScaleTransform(1.0,1.0);  // the render transform to apply to the canvas
 
         private List<MDC_Beam> m_Model = null;
+
+        // OLC::PGE stuff
+        private bool bAtomActive = false;
+            
 
         /// <summary>
         ///  A delegate for system idle.
@@ -123,8 +128,57 @@ namespace MomentDistributionCalculator
 
             DataContext = this;
 
-            OnUserCreate();
+            bAtomActive = true;
+            Thread t = new Thread(EngineThread);
+            t.Start();
+            t.Join();
+
             OnUserUpdate();
+        }
+
+        private void EngineThread()
+        {
+            // initialize engine
+            MDC_PrepareEngine();
+
+            if (!OnUserCreate()) bAtomActive = false;
+
+            while (bAtomActive)
+            {
+                MDC_CoreUpdate();
+            }
+
+            // Allow the user to free resources if they have overriden the destroy function
+            if(!OnUserDestroy())
+            {
+                // User denied access for some reason, so continue running
+                bAtomActive = true;
+            }
+
+            // TODO:: Thread cleanups
+
+        }
+
+        private void MDC_CoreUpdate()
+        {
+            throw new NotImplementedException();
+        }
+
+        // Context specific application
+        private void MDC_PrepareEngine()
+        {
+            // start the graphics context?
+
+            // Construct default gont sheet
+
+            // Create Primary Layer "0"
+            CreateLayer();
+            vLayers[0].bUpdate = true;
+            vLayers[0].bShow = true;
+            SetDrawTarget(nullptr);
+
+            m_tp1 = DateTime.Now;
+            m_tp2 = DateTime.Now;
         }
 
         static int count = 0;
@@ -143,7 +197,7 @@ namespace MomentDistributionCalculator
             count++;
         }
 
-        private void OnUserCreate()
+        private bool OnUserCreate()
         {
             Members = new List<MDC_Beam>();
             MDC_DrawingObjects = new List<DrawingObject>();
@@ -187,6 +241,8 @@ namespace MomentDistributionCalculator
             MainGrid = new MDC_Grid(20, 10, MainCanvas.Width, MainCanvas.Height, Colors.DarkGray);
             MDC_DrawingObjects.Add(MainGrid);
             MainCanvas.Children.Add(MainGrid);
+
+            return true;
 
             //// Draws a dummy structure
             //DummyStructure(len, startX, endX, startY, endY, startZ, endZ);
@@ -267,7 +323,7 @@ namespace MomentDistributionCalculator
 
         }
 
-        private void OnUserUpdate()
+        private bool OnUserUpdate()
         {
             // Clear the canvas
             MainCanvas.Children.Clear();
@@ -295,6 +351,8 @@ namespace MomentDistributionCalculator
                 // Draw a node at the current mouse location
                 DrawingHelpers.DrawCircle(MainCanvas, CurrentMouseLocationPoint.X, CurrentMouseLocationPoint.Y, 6, Colors.Black, Colors.Blue);
             }
+
+            return true;
         }
 
         protected void MainCanvas_MouseMove(object sender, MouseEventArgs args)
