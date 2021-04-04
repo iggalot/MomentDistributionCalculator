@@ -50,6 +50,9 @@ namespace MomentDistributionCalculator
 
         // OLC::PGE stuff
         private bool bAtomActive = false;
+        private DateTime m_tp1, m_tp2;
+        private double fLastElapsed = 0.0f;
+        int nFrameCount = 0;
             
 
         /// <summary>
@@ -141,11 +144,16 @@ namespace MomentDistributionCalculator
             // initialize engine
             MDC_PrepareEngine();
 
-            if (!OnUserCreate()) bAtomActive = false;
+            Dispatcher.Invoke(() =>
+            {
+                if (!OnUserCreate()) bAtomActive = false;
+
+            });
 
             while (bAtomActive)
             {
-                MDC_CoreUpdate();
+
+                Dispatcher.Invoke(() => { MDC_CoreUpdate(); });                
             }
 
             // Allow the user to free resources if they have overriden the destroy function
@@ -159,9 +167,25 @@ namespace MomentDistributionCalculator
 
         }
 
+        private bool OnUserDestroy()
+        {
+            return true;
+        }
+
         private void MDC_CoreUpdate()
         {
-            throw new NotImplementedException();
+            // Timing
+            m_tp2 = DateTime.Now;
+            TimeSpan elapsedTime = m_tp2.Subtract(m_tp1);
+
+            //Time per fram coefficient
+            double fElapsedTime = elapsedTime.TotalMilliseconds;
+            fLastElapsed = fElapsedTime;
+
+            // Some platforms need to check for events
+
+            // Check hardware input states from previous frame
+            
         }
 
         // Context specific application
@@ -172,10 +196,7 @@ namespace MomentDistributionCalculator
             // Construct default gont sheet
 
             // Create Primary Layer "0"
-            CreateLayer();
-            vLayers[0].bUpdate = true;
-            vLayers[0].bShow = true;
-            SetDrawTarget(nullptr);
+
 
             m_tp1 = DateTime.Now;
             m_tp2 = DateTime.Now;
