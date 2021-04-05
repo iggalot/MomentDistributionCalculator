@@ -4,11 +4,34 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MomentDistributionCalculator"
+        xmlns:sharpGL="clr-namespace:SharpGL.WPF;assembly=SharpGL.WPF"
         mc:Ignorable="d"
-        Title="MainWindow">
+        Title="Existing Project">
     <Grid>
-        <StackPanel Orientation="Vertical">
-        <Viewbox Name="CanvasViewBox"
+        <DockPanel>
+            <ToolBarPanel DockPanel.Dock="Top">
+                <ToolBar>
+                    <Label Target="{Binding ElementName=comboRenderMode}">Render Mode</Label>
+                    <ComboBox x:Name="comboRenderMode" SelectedIndex="0" Width="140">
+                        <ComboBoxItem>Retained Mode</ComboBoxItem>
+                        <ComboBoxItem>Immediate Mode</ComboBoxItem>
+                    </ComboBox>
+                    <CheckBox x:Name="checkBoxUseToonShader" Content="Use Toon Shader" />
+                </ToolBar>
+            </ToolBarPanel>
+            
+            <sharpGL:OpenGLControl 
+                x:Name="openGLControl"
+                OpenGLInitialized="OpenGLControl_OpenGLInitialized"
+                Resized="OpenGLControl_Resized"
+                OpenGLDraw="OpenGLControl_OpenGLDraw"
+                RenderContextType="FBO"
+                />
+        </DockPanel>
+
+
+        <StackPanel Visibility="Hidden" Orientation="Vertical">
+            <Viewbox Name="CanvasViewBox"
                  HorizontalAlignment="Left"
                  VerticalAlignment="Top"
                  Stretch="Fill">
@@ -64,4 +87,5 @@
 
         </StackPanel>
     </Grid>
+
 </Window>
