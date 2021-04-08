@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 
-namespace MomentDistributionCalculator
+namespace MomentDistributionCalculator.Utilities
 {
     /// <summary>
     /// A small helper class to load manifest resource files.

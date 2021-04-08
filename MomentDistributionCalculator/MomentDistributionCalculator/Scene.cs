@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GlmNet;
+using MomentDistributionCalculator.Utilities;
 using SharpGL;
 using SharpGL.Enumerations;
 using SharpGL.Shaders;
@@ -105,10 +106,8 @@ namespace MomentDistributionCalculator
             //  Pop the attributes, restoring all polygon state.
             gl.PopAttrib();
 
-            gl.Color(255, 0, 0, 0.5);
-            gl.DrawText(0, 0, 1.0f, 0.0f, 0.0f, "Courier New", 12.0f, string.Format("Draw Time: {0:0.0000} ms ~ {1:0.0} FPS", 60, 1000.0 / 60));
-            //gl.Flush();
-            gl.Color(100, 100, 100, 0.5);
+            // Draw a text object on the screen.
+            gl.DrawText(0, 0, 1.0f, 0.0f, 0.0f, "Courier New", 12.0f, string.Format("Draw Time: {0:0.0000} ms ~ {1:0.0} FPS (PLACEHOLDER TEXT)", 60, 1000.0 / 60));
         }
 
         /// <summary>
@@ -148,10 +147,8 @@ namespace MomentDistributionCalculator
             shader.Unbind(gl);
             // Draw some text?
 
-            gl.Color(255, 0, 0, 0.5);
-            gl.DrawText(0, 0, 1.0f, 0.0f, 0.0f, "Courier New", 12.0f, string.Format("Draw Time: {0:0.0000} ms ~ {1:0.0} FPS", 60, 1000.0 / 60));
-            //gl.Flush();
-            gl.Color(100, 100, 100, 0.5);
+            // Draw a text object on the screen.
+            gl.DrawText(0, 0, 0.0f, 1.0f, 0.0f, "Courier New", 12.0f, string.Format("Draw Time: {0:0.0000} ms ~ {1:0.0} FPS (PLACEHOLDER TEXT)", 60, 1000.0 / 60));
         }
         
         //  The shaders we use.

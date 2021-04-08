@@ -92,7 +92,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="ManifestResourceLoader.cs" />
+    <Compile Include="Utilities\ManifestResourceLoader.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="TrefoilKnot.cs" />
     <Page Include="MainWindow.xaml">

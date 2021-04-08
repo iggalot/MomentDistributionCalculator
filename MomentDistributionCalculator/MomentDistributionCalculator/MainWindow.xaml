@@ -15,7 +15,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="175"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
 
 
@@ -42,8 +42,6 @@
             Height="600"
                 />
 
-
-
         <Viewbox Name="CanvasViewBox"
                  Grid.Row="1"
                  Grid.Column="2"
@@ -57,7 +55,8 @@
             </Canvas>
         </Viewbox>
         <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Visibility="Visible" Orientation="Vertical">
-                <TextBox Name="StatusBar" Text="{Binding StatusMessage}" Height="25" Width="100" VerticalAlignment="Bottom"/>
+            <StackPanel Orientation="Horizontal">  
+            <TextBox Name="StatusBar" Text="{Binding StatusMessage}" Height="25" Width="100" VerticalAlignment="Bottom"/>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock Text="Grid Size"  Height="25" Width="60" VerticalAlignment="Bottom"/>
                     <TextBox Name="GridX" Text="{Binding MainGrid.XSpacing}" Height="25" Width="100" VerticalAlignment="Bottom"/>
@@ -78,7 +77,8 @@
                     <TextBlock Text="#GridLines: "  Height="25" Width="60" VerticalAlignment="Bottom"/>
                     <TextBox Name="Count" Text="{Binding MainGrid.LineCount}" Height="25" Width="100" VerticalAlignment="Bottom"/>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal">
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
                     <TextBox Name="LeftState" Text="{Binding IsSelectedFirstPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
 
                     <TextBox Name="RightState" Text="{Binding IsSelectedSecondPoint}" Height="25" Width="100" VerticalAlignment="Bottom"/>
