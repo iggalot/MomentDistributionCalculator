@@ -25,10 +25,10 @@ namespace MomentDistributionCalculator
     /// </summary>
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        private const float WINDOW_WIDTH = 1000;
-        private const float WINDOW_HEIGHT = 800;
+        private const float WINDOW_WIDTH = 1600;
+        private const float WINDOW_HEIGHT = 900;
         private const float CANVAS_WIDTH = 800;
-        private const float CANVAS_HEIGHT = 400;
+        private const float CANVAS_HEIGHT = 600;
 
         private const int APP_IDLE_DELAY = 10;  // delay in milliseconds for a backgrgound thread
 

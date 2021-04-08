@@ -104,6 +104,11 @@ namespace MomentDistributionCalculator
 
             //  Pop the attributes, restoring all polygon state.
             gl.PopAttrib();
+
+            gl.Color(255, 0, 0, 0.5);
+            gl.DrawText(0, 0, 1.0f, 0.0f, 0.0f, "Courier New", 12.0f, string.Format("Draw Time: {0:0.0000} ms ~ {1:0.0} FPS", 60, 1000.0 / 60));
+            //gl.Flush();
+            gl.Color(100, 100, 100, 0.5);
         }
 
         /// <summary>
@@ -141,6 +146,12 @@ namespace MomentDistributionCalculator
 
             //  Unbind the shader.
             shader.Unbind(gl);
+            // Draw some text?
+
+            gl.Color(255, 0, 0, 0.5);
+            gl.DrawText(0, 0, 1.0f, 0.0f, 0.0f, "Courier New", 12.0f, string.Format("Draw Time: {0:0.0000} ms ~ {1:0.0} FPS", 60, 1000.0 / 60));
+            //gl.Flush();
+            gl.Color(100, 100, 100, 0.5);
         }
         
         //  The shaders we use.
